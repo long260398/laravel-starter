@@ -2,7 +2,7 @@
 
 namespace App\Filament\Resources\Posts\Schemas;
 
-use App\Enums\PostStatus;
+use App\Enums\PublishStatus;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\RichEditor;
@@ -44,7 +44,7 @@ class PostForm
                     ->columnSpanFull(),
                 Select::make('status')
                     ->label('Trạng thái')
-                    ->options(PostStatus::class)
+                    ->options(PublishStatus::class)
                     ->required()
                     ->native(false),
                 DateTimePicker::make('published_at')

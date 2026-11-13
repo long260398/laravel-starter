@@ -2,7 +2,7 @@
 
 namespace Database\Factories;
 
-use App\Enums\PostStatus;
+use App\Enums\PublishStatus;
 use App\Models\Post;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -24,7 +24,7 @@ class PostFactory extends Factory
             'title' => $title,
             'slug' => str($title)->slug(),
             'content' => $this->faker->paragraphs(3, true),
-            'status' => PostStatus::Draft,
+            'status' => PublishStatus::Draft,
             'published_at' => null,
         ];
     }
@@ -32,7 +32,7 @@ class PostFactory extends Factory
     public function published(): static
     {
         return $this->state(fn (array $attributes): array => [
-            'status' => PostStatus::Published,
+            'status' => PublishStatus::Published,
             'published_at' => now(),
         ]);
     }

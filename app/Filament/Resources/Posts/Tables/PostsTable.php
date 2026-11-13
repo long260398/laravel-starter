@@ -2,7 +2,7 @@
 
 namespace App\Filament\Resources\Posts\Tables;
 
-use App\Enums\PostStatus;
+use App\Enums\PublishStatus;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
@@ -41,7 +41,7 @@ class PostsTable
             ->filters([
                 SelectFilter::make('status')
                     ->label('Trạng thái')
-                    ->options(PostStatus::class),
+                    ->options(PublishStatus::class),
                 TrashedFilter::make()
                     ->label('Thùng rác'),
             ])

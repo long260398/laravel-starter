@@ -2,7 +2,7 @@
 
 namespace Tests\Feature;
 
-use App\Enums\PostStatus;
+use App\Enums\PublishStatus;
 use App\Filament\Resources\Posts\Pages\CreatePost;
 use App\Filament\Resources\Posts\Pages\EditPost;
 use App\Filament\Resources\Posts\Pages\ListPosts;
@@ -50,7 +50,7 @@ class PostResourceTest extends TestCase
             ->fillForm([
                 'title' => 'Tiêu đề bài viết đầu tiên',
                 'content' => 'Nội dung bài viết.',
-                'status' => PostStatus::Draft,
+                'status' => PublishStatus::Draft,
                 'featured_image' => UploadedFile::fake()->image('cover.jpg'),
             ])
             ->call('create')
@@ -72,7 +72,7 @@ class PostResourceTest extends TestCase
                 'title' => 'Bài viết xuất bản ngay',
                 'slug' => 'bai-viet-xuat-ban-ngay',
                 'content' => 'Nội dung.',
-                'status' => PostStatus::Published,
+                'status' => PublishStatus::Published,
             ])
             ->call('create')
             ->assertHasNoFormErrors();
@@ -80,7 +80,7 @@ class PostResourceTest extends TestCase
         $post = Post::query()->where('slug', 'bai-viet-xuat-ban-ngay')->first();
 
         $this->assertNotNull($post);
-        $this->assertSame(PostStatus::Published, $post->status);
+        $this->assertSame(PublishStatus::Published, $post->status);
         $this->assertNotNull($post->published_at);
     }
 

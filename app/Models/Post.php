@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\Enums\PostStatus;
+use App\Enums\PublishStatus;
 use App\Models\Concerns\DeletesStoredFiles;
 use Database\Factories\PostFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -27,7 +27,7 @@ class Post extends Model
     protected static function booted(): void
     {
         static::saving(function (Post $post): void {
-            if ($post->status === PostStatus::Published && $post->published_at === null) {
+            if ($post->status === PublishStatus::Published && $post->published_at === null) {
                 $post->published_at = now();
             }
         });
@@ -39,7 +39,7 @@ class Post extends Model
     protected function casts(): array
     {
         return [
-            'status' => PostStatus::class,
+            'status' => PublishStatus::class,
             'published_at' => 'datetime',
         ];
     }
