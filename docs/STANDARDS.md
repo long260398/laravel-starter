@@ -1,0 +1,1 @@
+Đọc và tuân thủ @docs/STANDARDS.md cho mọi thay đổi trong dự án này.
