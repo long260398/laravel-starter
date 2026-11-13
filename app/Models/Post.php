@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\PostStatus;
+use App\Models\Concerns\DeletesStoredFiles;
 use Database\Factories\PostFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -14,7 +15,14 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Post extends Model
 {
     /** @use HasFactory<PostFactory> */
-    use HasFactory, SoftDeletes;
+    use DeletesStoredFiles, HasFactory, SoftDeletes;
+
+    /**
+     * @var array<string, string>
+     */
+    protected array $fileColumns = [
+        'featured_image' => 'public',
+    ];
 
     protected static function booted(): void
     {
