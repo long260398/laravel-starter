@@ -6,6 +6,7 @@ Code phải chung chung, không gắn với một ngành cụ thể. Không over
 
 ## Stack
 Laravel 13, Filament 5, PHP >= 8.3 (máy dev chạy 8.5 nhưng code phải tương thích 8.3), SQLite (dev) / MySQL (prod).
+Timezone: Asia/Ho_Chi_Minh.
 
 ## Database
 - PK: `id` BIGINT tự tăng. FK: `{entity}_id`, luôn có index + foreign key constraint.
