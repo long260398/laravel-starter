@@ -34,6 +34,7 @@ Timezone: Asia/Ho_Chi_Minh.
 - Không tải thư viện JS qua CDN; mọi package qua composer/npm.
 - Không thêm package mới khi chưa được duyệt; ưu tiên dùng thứ có sẵn trong Laravel/Filament.
 - Thêm package mới phải chạy `composer audit` / `npm audit`.
+- Khi deploy sau proxy/CDN (Cloudflare...) phải cấu hình `TrustProxies` để rate limit theo đúng IP khách.
 
 ## Giao diện
 - Admin dùng tiếng Việt (APP_LOCALE=vi); label, thông báo, tên menu viết tiếng Việt.
