@@ -1,3 +1,8 @@
+# Laravel Starter
+
+Đọc và tuân thủ @docs/STANDARDS.md cho mọi thay đổi trong dự án này.
+Nếu STANDARDS.md mâu thuẫn với phần Boost bên dưới, ưu tiên STANDARDS.md và hỏi lại tôi. 
+
 <laravel-boost-guidelines>
 === foundation rules ===
 
