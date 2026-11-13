@@ -107,7 +107,7 @@ class PostResourceTest extends TestCase
 
     public function test_can_soft_delete_restore_and_force_delete_post(): void
     {
-        $this->actingAs(User::factory()->create());
+        $this->actingAs(User::factory()->admin()->create());
 
         $post = Post::factory()->create();
 
@@ -132,18 +132,28 @@ class PostResourceTest extends TestCase
         $this->assertDatabaseMissing('posts', ['id' => $post->id]);
     }
 
-    public function test_post_policy_allows_authenticated_user_full_crud(): void
+    public function test_editor_has_full_crud_but_cannot_force_delete_post(): void
     {
-        $user = User::factory()->create();
+        $editor = User::factory()->editor()->create();
         $post = Post::factory()->create();
 
-        $this->assertTrue($user->can('viewAny', Post::class));
-        $this->assertTrue($user->can('view', $post));
-        $this->assertTrue($user->can('create', Post::class));
-        $this->assertTrue($user->can('update', $post));
-        $this->assertTrue($user->can('delete', $post));
-        $this->assertTrue($user->can('restore', $post));
-        $this->assertTrue($user->can('forceDelete', $post));
+        $this->assertTrue($editor->can('viewAny', Post::class));
+        $this->assertTrue($editor->can('view', $post));
+        $this->assertTrue($editor->can('create', Post::class));
+        $this->assertTrue($editor->can('update', $post));
+        $this->assertTrue($editor->can('delete', $post));
+        $this->assertTrue($editor->can('restore', $post));
+        $this->assertFalse($editor->can('forceDelete', $post));
+        $this->assertFalse($editor->can('forceDeleteAny', Post::class));
+    }
+
+    public function test_admin_can_force_delete_post(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $post = Post::factory()->create();
+
+        $this->assertTrue($admin->can('forceDelete', $post));
+        $this->assertTrue($admin->can('forceDeleteAny', Post::class));
     }
 
     public function test_safe_content_strips_unsafe_html(): void

@@ -76,7 +76,7 @@ class PostPolicy
      */
     public function forceDelete(User $user, Post $post): bool
     {
-        return true;
+        return $user->isAdmin();
     }
 
     /**
@@ -84,6 +84,6 @@ class PostPolicy
      */
     public function forceDeleteAny(User $user): bool
     {
-        return true;
+        return $user->isAdmin();
     }
 }
