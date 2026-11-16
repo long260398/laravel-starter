@@ -23,5 +23,6 @@ Route::get('/robots.txt', function () {
     return response()->view('robots', [], 200, ['Content-Type' => 'text/plain']);
 })->name('robots');
 
-// Phải đăng ký cuối cùng: khớp mọi slug chưa có route cụ thể nào xử lý.
-Route::get('/{slug}', [StaticPageController::class, 'show'])->name('static-pages.show');
+// Route::fallback() chỉ được Laravel xét tới khi không route nào khác khớp,
+// bất kể thứ tự đăng ký (kể cả route của module nạp sau file này).
+Route::fallback([StaticPageController::class, 'show'])->name('static-pages.show');

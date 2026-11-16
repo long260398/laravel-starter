@@ -17,5 +17,9 @@
         @endif
     </section>
 
+    @foreach (module_registry()->homeSections() as $item)
+        @include($item['view'], $item['data'])
+    @endforeach
+
     <x-banner-slider :banners="$middleBanners" />
 @endsection

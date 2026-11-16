@@ -26,7 +26,8 @@ class SitemapController extends Controller
                         'loc' => route('static-pages.show', $page->slug),
                         'lastmod' => $page->updated_at,
                     ]),
-                );
+                )
+                ->merge(module_registry()->sitemapUrls());
 
             return view('sitemap', ['urls' => $urls])->render();
         });

@@ -81,6 +81,17 @@ class StaticPage extends Model
             return true;
         }
 
+        // Prefix route của mọi module (bật hay tắt) luôn bị cấm — nếu module đang
+        // tắt, route của nó không tồn tại trong Route::getRoutes() nên không bị
+        // vòng quét động dưới đây bắt được, phải kiểm tra riêng từ config.
+        $modulePrefixes = collect(config('modules', []))
+            ->flatMap(fn (array $module): array => $module['route_prefixes'] ?? [])
+            ->all();
+
+        if (in_array($slug, $modulePrefixes, true)) {
+            return true;
+        }
+
         foreach (Route::getRoutes() as $route) {
             $uri = trim($route->uri(), '/');
 

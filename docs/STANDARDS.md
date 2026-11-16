@@ -36,6 +36,23 @@ Timezone: Asia/Ho_Chi_Minh.
 - Thêm package mới phải chạy `composer audit` / `npm audit`.
 - Khi deploy sau proxy/CDN (Cloudflare...) phải cấu hình `TrustProxies` để rate limit theo đúng IP khách.
 
+## Module tùy chọn
+Tính năng riêng theo ngành (Dịch vụ, Sản phẩm...) là module độc lập, bật/tắt qua `.env`, **không bao giờ xóa dữ liệu khi tắt**. Thêm module mới = tạo thư mục + thêm 1 entry trong `config/modules.php` — **không sửa bất kỳ file core nào**.
+
+- **Cấu trúc**: `app/Modules/{Tên}/` chứa `Models/`, `Policies/`, `Http/Controllers/`, `database/migrations/`, `Filament/Resources/`, `routes/web.php`, `resources/views/`, và 1 `{Tên}ServiceProvider`. Factory của model trong module vẫn đặt ở `database/factories/` (core) vì `HasFactory` không tự đoán được factory nằm ngoài `App\Models` — model phải override `newFactory()` để chỉ đích danh.
+- **Khai báo** trong `config/modules.php`: mỗi module gồm `enabled` (đọc từ env), `provider` (FQCN), `path`, `namespace`, `route_prefixes` (mảng segment đầu của route module), `label`.
+- **Đăng ký provider**: `App\Providers\ModulesServiceProvider` (core, cố định) tự loop `config('modules')` và `$this->app->register()` provider nào có `enabled = true`. Provider của module **không cần tự kiểm tra lại cờ** — nó chỉ tồn tại trong request khi module bật.
+- **Filament resource**: `AdminPanelProvider` loop qua module bật, `discoverResources(in: "{path}/Filament/Resources", for: "{namespace}\Filament\Resources")` — không hardcode tên module.
+- **3 điểm cắm core↔module** qua singleton `App\Support\Modules\ModuleRegistry` (helper `module_registry()`):
+  - `registerNavItem(string $view, array|Closure $data = [])` — thêm mục menu.
+  - `registerHomeSection(string $view, array|Closure $data = [])` — thêm section trang chủ (`$data` dùng `Closure` để query lazy, chỉ chạy lúc render).
+  - `registerSitemapUrls(callable $provider)` — thêm URL vào sitemap.
+  Module tự gọi 3 hàm này trong `boot()`. Core chỉ `@include($item['view'], $item['data'])` (nav/home) hoặc `->merge(module_registry()->sitemapUrls())` (sitemap) — **không biết tên module nào**.
+- **Module không truyền HTML thô vào core.** Mọi điểm cắm trao đổi qua `view + data` (hoặc mảng URL thuần cho sitemap), không bao giờ qua chuỗi HTML đã render/`{!! !!}` — core không audit được HTML tự do từ module.
+- **Route của module** nạp qua `loadRoutesFrom()` trong `boot()` của module provider. Route "trang tĩnh" (`StaticPage`, slug tự do) đăng ký bằng `Route::fallback()` — Laravel luôn xét route fallback sau cùng, bất kể thứ tự đăng ký, nên route module không cần quan tâm thứ tự boot.
+- **Slug cấm**: `StaticPage::isReservedSlug()` tự gộp `route_prefixes` từ `config('modules')` — áp dụng **cả khi module đang tắt** (để không bị đè khi bật lại sau). Thêm module mới chỉ cần khai `route_prefixes` trong config, không sửa `StaticPage.php`.
+- **Vận hành**: bật module xong phải chạy `php artisan migrate` (migration của module không tự chạy nếu module tắt lúc `migrate`). Tắt module không xóa migration/bảng/dữ liệu đã có — chỉ dừng đăng ký route/view/policy/Filament resource/registry.
+
 ## Giao diện
 - Admin dùng tiếng Việt (APP_LOCALE=vi); label, thông báo, tên menu viết tiếng Việt.
 

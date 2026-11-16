@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Setting;
+use App\Support\Modules\ModuleRegistry;
 use Illuminate\Support\Facades\Storage;
 
 if (! function_exists('setting')) {
@@ -21,5 +22,12 @@ if (! function_exists('public_file_url')) {
         }
 
         return Storage::disk('public')->url($path);
+    }
+}
+
+if (! function_exists('module_registry')) {
+    function module_registry(): ModuleRegistry
+    {
+        return app(ModuleRegistry::class);
     }
 }

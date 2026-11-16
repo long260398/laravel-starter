@@ -22,6 +22,9 @@
                     {{ $page->title }}
                 </a>
             @endforeach
+            @foreach (module_registry()->navItems() as $item)
+                @include($item['view'], $item['data'])
+            @endforeach
             <a href="{{ route('contact.create') }}" class="hover:text-brand-600">Liên hệ</a>
         </nav>
 
@@ -47,6 +50,9 @@
                 <a href="{{ route('static-pages.show', $page->slug) }}" class="hover:text-brand-600">
                     {{ $page->title }}
                 </a>
+            @endforeach
+            @foreach (module_registry()->navItems() as $item)
+                @include($item['view'], $item['data'])
             @endforeach
             <a href="{{ route('contact.create') }}" class="hover:text-brand-600">Liên hệ</a>
         </div>

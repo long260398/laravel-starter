@@ -1,0 +1,1 @@
+<section>{{ $heading }}</section>

@@ -24,7 +24,7 @@ class AdminPanelProvider extends PanelProvider
 {
     public function panel(Panel $panel): Panel
     {
-        return $panel
+        $panel
             ->default()
             ->id('admin')
             ->path('admin')
@@ -41,7 +41,24 @@ class AdminPanelProvider extends PanelProvider
             ->widgets([
                 AccountWidget::class,
                 FilamentInfoWidget::class,
-            ])
+            ]);
+
+        // Resource của mỗi module bật được discover riêng từ thư mục Filament/Resources
+        // của module đó — không hardcode tên module nào ở đây. discoverResources() gộp
+        // thêm vào danh sách đã có (của core), không thay thế.
+        foreach (config('modules', []) as $module) {
+            if (! ($module['enabled'] ?? false)) {
+                continue;
+            }
+
+            $resourcesPath = rtrim($module['path'], '/\\').'/Filament/Resources';
+
+            if (is_dir($resourcesPath)) {
+                $panel->discoverResources(in: $resourcesPath, for: $module['namespace'].'\\Filament\\Resources');
+            }
+        }
+
+        return $panel
             ->middleware([
                 SecurityHeaders::class,
                 EncryptCookies::class,
