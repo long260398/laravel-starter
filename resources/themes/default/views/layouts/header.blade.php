@@ -1,7 +1,6 @@
 @php
     $logoUrl = public_file_url(setting('logo'));
     $siteName = setting('site_name', config('app.name'));
-    $navStaticPages = \App\Models\StaticPage::query()->published()->get();
 @endphp
 
 <header class="border-b border-brand-100 bg-surface">

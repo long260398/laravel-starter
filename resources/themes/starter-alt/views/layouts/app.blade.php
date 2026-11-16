@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="vi" data-theme="starter-alt">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -18,7 +18,7 @@
 
     @include('partials.tracking')
 
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @vite([active_theme()->cssEntry(), active_theme()->jsEntry()])
 </head>
 <body class="flex min-h-screen flex-col bg-surface font-sans text-ink antialiased">
     @include('layouts.header')

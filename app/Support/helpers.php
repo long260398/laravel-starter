@@ -2,6 +2,7 @@
 
 use App\Models\Setting;
 use App\Support\Modules\ModuleRegistry;
+use App\Support\Theme\ActiveTheme;
 use Illuminate\Support\Facades\Storage;
 
 if (! function_exists('setting')) {
@@ -29,5 +30,12 @@ if (! function_exists('module_registry')) {
     function module_registry(): ModuleRegistry
     {
         return app(ModuleRegistry::class);
+    }
+}
+
+if (! function_exists('active_theme')) {
+    function active_theme(): ActiveTheme
+    {
+        return app(ActiveTheme::class);
     }
 }

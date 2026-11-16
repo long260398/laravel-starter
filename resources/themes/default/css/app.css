@@ -1,7 +1,9 @@
 @import 'tailwindcss';
 
-@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
-@source '../../storage/framework/views/*.php';
+@source '../views/**/*.blade.php';
+@source '../../../../app/Modules/*/resources/views/**/*.blade.php';
+@source '../../../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../../../storage/framework/views/*.php';
 
 /*
  * Theme dùng chung cho mọi khách hàng: đổi giao diện cho một dự án cụ thể
