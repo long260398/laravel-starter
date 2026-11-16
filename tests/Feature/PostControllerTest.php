@@ -14,28 +14,28 @@ class PostControllerTest extends TestCase
     {
         $post = Post::factory()->published()->create();
 
-        $this->get('/tin-tuc')->assertStatus(200)->assertSee($post->title);
+        $this->get('/blog')->assertStatus(200)->assertSee($post->title);
     }
 
     public function test_index_does_not_list_draft_posts(): void
     {
         $post = Post::factory()->create();
 
-        $this->get('/tin-tuc')->assertDontSee($post->title);
+        $this->get('/blog')->assertDontSee($post->title);
     }
 
     public function test_show_returns_200_for_published_post(): void
     {
         $post = Post::factory()->published()->create();
 
-        $this->get("/tin-tuc/{$post->slug}")->assertStatus(200)->assertSee($post->title);
+        $this->get("/blog/{$post->slug}")->assertStatus(200)->assertSee($post->title);
     }
 
     public function test_show_returns_404_for_draft_post(): void
     {
         $post = Post::factory()->create();
 
-        $this->get("/tin-tuc/{$post->slug}")->assertStatus(404);
+        $this->get("/blog/{$post->slug}")->assertStatus(404);
     }
 
     public function test_show_returns_404_for_post_scheduled_in_the_future(): void
@@ -44,11 +44,11 @@ class PostControllerTest extends TestCase
             'published_at' => now()->addDay(),
         ]);
 
-        $this->get("/tin-tuc/{$post->slug}")->assertStatus(404);
+        $this->get("/blog/{$post->slug}")->assertStatus(404);
     }
 
     public function test_show_returns_404_for_unknown_slug(): void
     {
-        $this->get('/tin-tuc/khong-ton-tai')->assertStatus(404);
+        $this->get('/blog/khong-ton-tai')->assertStatus(404);
     }
 }

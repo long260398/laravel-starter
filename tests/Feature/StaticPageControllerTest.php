@@ -31,7 +31,7 @@ class StaticPageControllerTest extends TestCase
 
     public function test_slug_matching_a_known_route_is_handled_by_that_route_not_static_page(): void
     {
-        $this->get('/tin-tuc')->assertStatus(200);
-        $this->get('/lien-he')->assertStatus(200);
+        $this->get('/blog')->assertStatus(200);
+        $this->get('/contact')->assertStatus(200);
     }
 }
