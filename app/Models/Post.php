@@ -6,6 +6,7 @@ use App\Enums\PublishStatus;
 use App\Models\Concerns\DeletesStoredFiles;
 use Database\Factories\PostFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -51,5 +52,15 @@ class Post extends Model
     protected function safeContent(): Attribute
     {
         return Attribute::get(fn (): string => (string) str((string) $this->content)->sanitizeHtml());
+    }
+
+    /**
+     * Bài đã xuất bản và đã tới thời điểm `published_at`. Dùng để lấy bài cho frontend.
+     */
+    public function scopePublished(Builder $query): Builder
+    {
+        return $query
+            ->where('status', PublishStatus::Published)
+            ->where('published_at', '<=', now());
     }
 }

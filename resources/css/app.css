@@ -3,7 +3,27 @@
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../storage/framework/views/*.php';
 
+/*
+ * Theme dùng chung cho mọi khách hàng: đổi giao diện cho một dự án cụ thể
+ * chỉ cần sửa các biến trong khối @theme này, không cần sửa lại từng view.
+ */
 @theme {
     --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol', 'Noto Color Emoji';
+
+    --color-brand-50: oklch(0.97 0.02 250);
+    --color-brand-100: oklch(0.93 0.04 250);
+    --color-brand-200: oklch(0.86 0.07 250);
+    --color-brand-300: oklch(0.77 0.1 250);
+    --color-brand-400: oklch(0.65 0.14 250);
+    --color-brand-500: oklch(0.55 0.17 255);
+    --color-brand-600: oklch(0.47 0.17 258);
+    --color-brand-700: oklch(0.4 0.15 260);
+    --color-brand-800: oklch(0.32 0.12 262);
+    --color-brand-900: oklch(0.26 0.09 264);
+
+    --color-ink: oklch(0.22 0.02 264);
+    --color-ink-muted: oklch(0.48 0.02 264);
+    --color-surface: oklch(0.99 0.002 264);
+    --color-surface-muted: oklch(0.96 0.004 264);
 }

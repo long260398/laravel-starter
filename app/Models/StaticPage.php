@@ -6,6 +6,7 @@ use App\Enums\PublishStatus;
 use App\Models\Concerns\DeletesStoredFiles;
 use Database\Factories\StaticPageFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -99,5 +100,13 @@ class StaticPage extends Model
         }
 
         return false;
+    }
+
+    /**
+     * Trang tĩnh đã xuất bản, sắp theo `sort_order`. Dùng để lấy trang cho frontend/menu.
+     */
+    public function scopePublished(Builder $query): Builder
+    {
+        return $query->where('status', PublishStatus::Published)->orderBy('sort_order');
     }
 }
