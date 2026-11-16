@@ -3,7 +3,7 @@
 namespace App\Modules\Services\Models;
 
 use App\Enums\PublishStatus;
-use Database\Factories\ServiceCategoryFactory;
+use App\Modules\Services\Database\Factories\ServiceCategoryFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;

@@ -1,6 +1,6 @@
 <?php
 
-namespace Database\Factories;
+namespace App\Modules\Services\Database\Factories;
 
 use App\Enums\PublishStatus;
 use App\Modules\Services\Models\Service;

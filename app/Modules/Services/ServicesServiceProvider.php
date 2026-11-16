@@ -19,7 +19,7 @@ class ServicesServiceProvider extends ServiceProvider
 {
     public function boot(): void
     {
-        $this->loadMigrationsFrom(__DIR__.'/database/migrations');
+        $this->loadMigrationsFrom(__DIR__.'/Database/Migrations');
         $this->loadViewsFrom(__DIR__.'/resources/views', 'services');
         $this->loadRoutesFrom(__DIR__.'/routes/web.php');
 

@@ -1,17 +1,17 @@
 <?php
 
-namespace Database\Factories;
+namespace App\Modules\Gallery\Database\Factories;
 
 use App\Enums\PublishStatus;
-use App\Modules\Services\Models\ServiceCategory;
+use App\Modules\Gallery\Models\GalleryAlbum;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends Factory<ServiceCategory>
+ * @extends Factory<GalleryAlbum>
  */
-class ServiceCategoryFactory extends Factory
+class GalleryAlbumFactory extends Factory
 {
-    protected $model = ServiceCategory::class;
+    protected $model = GalleryAlbum::class;
 
     /**
      * Define the model's default state.
@@ -20,11 +20,12 @@ class ServiceCategoryFactory extends Factory
      */
     public function definition(): array
     {
-        $name = $this->faker->words(2, true);
+        $title = $this->faker->words(3, true);
 
         return [
-            'name' => $name,
-            'slug' => str($name)->slug(),
+            'title' => $title,
+            'slug' => str($title)->slug(),
+            'description' => $this->faker->sentence(),
             'status' => PublishStatus::Draft,
         ];
     }

@@ -4,7 +4,7 @@ namespace App\Modules\Services\Models;
 
 use App\Enums\PublishStatus;
 use App\Models\Concerns\DeletesStoredFiles;
-use Database\Factories\ServiceFactory;
+use App\Modules\Services\Database\Factories\ServiceFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;

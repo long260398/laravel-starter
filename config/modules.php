@@ -1,5 +1,6 @@
 <?php
 
+use App\Modules\Gallery\GalleryServiceProvider;
 use App\Modules\Services\ServicesServiceProvider;
 
 return [
@@ -30,6 +31,15 @@ return [
         'namespace' => 'App\\Modules\\Services',
         'route_prefixes' => ['services'],
         'label' => 'Dịch vụ',
+    ],
+
+    'gallery' => [
+        'enabled' => (bool) env('MODULE_GALLERY', false),
+        'provider' => GalleryServiceProvider::class,
+        'path' => app_path('Modules/Gallery'),
+        'namespace' => 'App\\Modules\\Gallery',
+        'route_prefixes' => ['gallery'],
+        'label' => 'Thư viện ảnh',
     ],
 
 ];

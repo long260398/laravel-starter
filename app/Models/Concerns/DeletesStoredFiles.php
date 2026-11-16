@@ -3,11 +3,16 @@
 namespace App\Models\Concerns;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Storage;
 
 /**
- * Xóa file lưu trên disk khi cột file bị thay đổi (update) hoặc khi record bị xóa vĩnh viễn (forceDelete).
- * Soft delete không xóa file vì record còn có thể được restore.
+ * Xóa file lưu trên disk khi cột file bị thay đổi (update), hoặc khi record bị xóa.
+ *
+ * - Model có SoftDeletes: chỉ xóa file khi forceDelete() (xóa vĩnh viễn) — soft
+ *   delete thường giữ file vì record còn có thể được restore.
+ * - Model không có SoftDeletes: delete() đã là xóa vĩnh viễn duy nhất, nên dọn
+ *   file ngay ở event `deleted` (model không có forceDelete() để mà hook vào).
  *
  * Model dùng trait này phải khai báo:
  * protected array $fileColumns = ['column_name' => 'disk_name'];
@@ -45,14 +50,25 @@ trait DeletesStoredFiles
             $model->pendingFileCleanup = [];
         });
 
-        static::forceDeleted(function (Model $model): void {
-            foreach ($model->fileColumns as $column => $disk) {
-                $path = $model->getAttribute($column);
+        if (in_array(SoftDeletes::class, class_uses_recursive(static::class), true)) {
+            static::forceDeleted(function (Model $model): void {
+                static::deleteFileColumns($model);
+            });
+        } else {
+            static::deleted(function (Model $model): void {
+                static::deleteFileColumns($model);
+            });
+        }
+    }
 
-                if (filled($path)) {
-                    Storage::disk($disk)->delete($path);
-                }
+    private static function deleteFileColumns(Model $model): void
+    {
+        foreach ($model->fileColumns as $column => $disk) {
+            $path = $model->getAttribute($column);
+
+            if (filled($path)) {
+                Storage::disk($disk)->delete($path);
             }
-        });
+        }
     }
 }
