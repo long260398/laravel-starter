@@ -63,6 +63,11 @@ Tính năng riêng theo ngành (Dịch vụ, Sản phẩm...) là module độc 
 - Route cố định do hệ thống định nghĩa (không phải slug nội dung do người dùng nhập) dùng tiếng Anh: `/blog`, `/contact`, `/sitemap.xml`, `/robots.txt`...
 - Ngoại lệ: slug của nội dung do editor/khách tạo — bài viết (Post), trang tĩnh (StaticPage), sản phẩm (Product, sau này) — giữ tự do theo tiêu đề gốc (có thể tiếng Việt có dấu/không dấu), không ép tiếng Anh.
 
+## Kiến trúc & API
+- Logic nghiệp vụ đặt trong Actions (`app/Actions`, module thì `app/Modules/{Tên}/Actions`): mỗi action 1 class, 1 method `handle()`. Controller, Filament và API (sau này) chỉ gọi lại, không viết logic trùng.
+- Áp dụng cho code mới. Code cũ (Contact, Settings...) sẽ được tách trong task riêng, không tự refactor khi đang làm task khác.
+- Chưa làm API. Khi cần, API sẽ là module `app/Modules/Api`, mặc định tắt.
+
 ## Cách làm việc
 - Trước khi code: trình bày kế hoạch ngắn, chờ tôi duyệt.
 - Test dùng PHPUnit (class-style, `php artisan make:test --phpunit`). Mỗi tính năng có feature test cho tạo/sửa/xóa + kiểm tra quyền.
