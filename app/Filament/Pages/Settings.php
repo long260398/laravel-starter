@@ -2,6 +2,7 @@
 
 namespace App\Filament\Pages;
 
+use App\Actions\SaveSettings;
 use App\Enums\NavigationGroup;
 use App\Models\Setting;
 use BackedEnum;
@@ -244,11 +245,7 @@ class Settings extends Page
 
     public function save(): void
     {
-        $data = $this->form->getState();
-
-        foreach ($data as $key => $value) {
-            Setting::set($key, $value);
-        }
+        app(SaveSettings::class)->handle($this->form->getState());
 
         Notification::make()
             ->title('Đã lưu cài đặt.')

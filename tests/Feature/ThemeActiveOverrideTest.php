@@ -4,34 +4,24 @@ namespace Tests\Feature;
 
 use App\Models\Post;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\Concerns\WithTemporaryEnv;
 use Tests\TestCase;
 
 /**
- * APP_THEME=starter-alt chỉ cho riêng test class này (theo đúng pattern
- * ServiceModuleDisabledTest — set env TRƯỚC parent::setUp() để app boot với
- * đúng giá trị). starter-alt chỉ override layout + home (tối giản, xem
+ * APP_THEME=starter-alt chỉ cho riêng test class này (set env TRƯỚC
+ * parent::setUp() để app boot với đúng giá trị — xem Tests\Concerns\
+ * WithTemporaryEnv). starter-alt chỉ override layout + home (tối giản, xem
  * resources/themes/starter-alt) — mọi view khác phải fallback về default.
  */
 class ThemeActiveOverrideTest extends TestCase
 {
-    use RefreshDatabase;
+    use RefreshDatabase, WithTemporaryEnv;
 
     protected function setUp(): void
     {
-        putenv('APP_THEME=starter-alt');
-        $_ENV['APP_THEME'] = 'starter-alt';
-        $_SERVER['APP_THEME'] = 'starter-alt';
+        $this->setTemporaryEnv(['APP_THEME' => 'starter-alt']);
 
         parent::setUp();
-    }
-
-    protected function tearDown(): void
-    {
-        putenv('APP_THEME=default');
-        $_ENV['APP_THEME'] = 'default';
-        $_SERVER['APP_THEME'] = 'default';
-
-        parent::tearDown();
     }
 
     public function test_home_page_uses_the_active_themes_own_view(): void

@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\Concerns\WithTemporaryEnv;
 use Tests\TestCase;
 
 /**
@@ -14,24 +15,13 @@ use Tests\TestCase;
  */
 class ThemeFallbackWarningTest extends TestCase
 {
-    use RefreshDatabase;
+    use RefreshDatabase, WithTemporaryEnv;
 
     protected function setUp(): void
     {
-        putenv('APP_THEME=theme-does-not-exist');
-        $_ENV['APP_THEME'] = 'theme-does-not-exist';
-        $_SERVER['APP_THEME'] = 'theme-does-not-exist';
+        $this->setTemporaryEnv(['APP_THEME' => 'theme-does-not-exist']);
 
         parent::setUp();
-    }
-
-    protected function tearDown(): void
-    {
-        putenv('APP_THEME=default');
-        $_ENV['APP_THEME'] = 'default';
-        $_SERVER['APP_THEME'] = 'default';
-
-        parent::tearDown();
     }
 
     public function test_home_page_falls_back_to_default_theme(): void

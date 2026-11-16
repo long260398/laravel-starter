@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\Concerns\WithTemporaryEnv;
 use Tests\TestCase;
 
 /**
@@ -10,28 +11,18 @@ use Tests\TestCase;
  * MODULE_SERVICES=true làm mặc định cho cả suite — ở đây phải set env
  * TRƯỚC khi gọi parent::setUp() để bootstrap/app.php đọc đúng giá trị khi
  * boot app riêng cho từng test (xem Illuminate\Foundation\Testing\TestCase::
- * createApplication(), gọi bootstrap/app.php mới mỗi lần).
+ * createApplication(), gọi bootstrap/app.php mới mỗi lần; khôi phục đúng
+ * giá trị gốc do Tests\Concerns\WithTemporaryEnv lo).
  */
 class ServiceModuleDisabledTest extends TestCase
 {
-    use RefreshDatabase;
+    use RefreshDatabase, WithTemporaryEnv;
 
     protected function setUp(): void
     {
-        putenv('MODULE_SERVICES=false');
-        $_ENV['MODULE_SERVICES'] = 'false';
-        $_SERVER['MODULE_SERVICES'] = 'false';
+        $this->setTemporaryEnv(['MODULE_SERVICES' => 'false']);
 
         parent::setUp();
-    }
-
-    protected function tearDown(): void
-    {
-        putenv('MODULE_SERVICES=true');
-        $_ENV['MODULE_SERVICES'] = 'true';
-        $_SERVER['MODULE_SERVICES'] = 'true';
-
-        parent::tearDown();
     }
 
     public function test_services_route_is_404_when_module_disabled(): void

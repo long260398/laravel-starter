@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\File;
+use Tests\Concerns\WithTemporaryEnv;
 use Tests\TestCase;
 
 /**
@@ -16,24 +17,13 @@ use Tests\TestCase;
  */
 class ThemeErrorPageFallbackTest extends TestCase
 {
-    use RefreshDatabase;
+    use RefreshDatabase, WithTemporaryEnv;
 
     protected function setUp(): void
     {
-        putenv('APP_THEME=starter-alt');
-        $_ENV['APP_THEME'] = 'starter-alt';
-        $_SERVER['APP_THEME'] = 'starter-alt';
+        $this->setTemporaryEnv(['APP_THEME' => 'starter-alt']);
 
         parent::setUp();
-    }
-
-    protected function tearDown(): void
-    {
-        putenv('APP_THEME=default');
-        $_ENV['APP_THEME'] = 'default';
-        $_SERVER['APP_THEME'] = 'default';
-
-        parent::tearDown();
     }
 
     public function test_404_falls_back_to_default_themes_error_page_when_active_theme_has_no_override(): void

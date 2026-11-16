@@ -50,6 +50,14 @@ class Setting extends Model
         ];
     }
 
+    /**
+     * @return array<int, string>
+     */
+    public static function fileKeys(): array
+    {
+        return static::$fileKeys;
+    }
+
     public static function get(string $key, mixed $default = null): mixed
     {
         $all = Cache::rememberForever(

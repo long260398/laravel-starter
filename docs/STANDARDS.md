@@ -76,11 +76,12 @@ Frontend tách khỏi controller qua hệ thống theme — đổi giao diện c
 
 ## Kiến trúc & API
 - Logic nghiệp vụ đặt trong Actions (`app/Actions`, module thì `app/Modules/{Tên}/Actions`): mỗi action 1 class, 1 method `handle()`. Controller, Filament và API (sau này) chỉ gọi lại, không viết logic trùng.
-- Áp dụng cho code mới. Code cũ (Contact, Settings...) sẽ được tách trong task riêng, không tự refactor khi đang làm task khác.
+- Action không phụ thuộc HTTP: nhận dữ liệu thuần, không dùng Request/abort(); lỗi nghiệp vụ ném exception riêng để web/API tự chuyển thành response.
 - Chưa làm API. Khi cần, API sẽ là module `app/Modules/Api`, mặc định tắt.
 
 ## Cách làm việc
 - Trước khi code: trình bày kế hoạch ngắn, chờ tôi duyệt.
 - Test dùng PHPUnit (class-style, `php artisan make:test --phpunit`). Mỗi tính năng có feature test cho tạo/sửa/xóa + kiểm tra quyền.
+- Test thay đổi env/config phải tự khôi phục; suite phải xanh khi chạy thứ tự ngẫu nhiên.
 - Chạy `php artisan test` và `vendor/bin/pint` trước khi báo xong.
 - Không tự commit; tôi review rồi tự commit.
