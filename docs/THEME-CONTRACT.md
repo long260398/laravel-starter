@@ -18,7 +18,7 @@ Theme khác chỉ cần có view nào muốn ghi đè — thiếu thì tự fall
 
 | View (tên Laravel) | File trong `views/` | Biến nhận được |
 |---|---|---|
-| `layouts.app` | `layouts/app.blade.php` | Không nhận qua mảng `view()`. Đọc biến PHP tùy chọn do view con khai báo trước `@include('partials.seo', ...)`: `$seoTitle`, `$seoDescription`, `$ogImageUrl`, `$ogType`, `$canonicalUrl` (tất cả optional, dùng `??`). `@include('layouts.header')`, `@include('layouts.footer')`, `@include('partials.seo', ...)`, `@include('partials.tracking')` — 2 partial sau là **core**, theme không override được. Phải gọi `@vite([active_theme()->cssEntry(), active_theme()->jsEntry()])`. |
+| `layouts.app` | `layouts/app.blade.php` | Không nhận qua mảng `view()`. Đọc biến PHP tùy chọn do view con khai báo trước `@include('partials.seo', ...)`: `$seoTitle`, `$seoDescription`, `$ogImageUrl`, `$ogType`, `$canonicalUrl` (tất cả optional, dùng `??`). `@include('layouts.header')`, `@include('layouts.footer')`, `@include('partials.seo', ...)`, `@include('partials.tracking')` — 2 partial sau là **core**, theme không override được. Phải gọi `@vite([active_theme()->cssEntry(), active_theme()->jsEntry()])`. **Bắt buộc** render slot `body_end` trước `</body>`: `@foreach (module_registry()->layoutPartials('body_end') as $item) @include($item['view'], $item['data']) @endforeach` — thiếu đoạn này, module nào cắm vào slot `body_end` (ví dụ `floating_contact`) sẽ không hiện trên theme đó. `ThemeContractTest` kiểm tra bằng cách bật module `floating_contact`, set setting mẫu rồi assert nút nổi xuất hiện khi render `layouts.app` của mọi theme. |
 | `layouts.header` | `layouts/header.blade.php` | `$navStaticPages` — `Collection<StaticPage>`, do View Composer core cung cấp (`AppServiceProvider`), **không phải theme tự query**. Ngoài ra dùng `setting()`, `module_registry()->navItems()`. |
 | `layouts.footer` | `layouts/footer.blade.php` | Không có — toàn bộ qua `setting()`. |
 | `home` | `home.blade.php` | `$sliderBanners` (`Collection<Banner>`), `$middleBanners` (`Collection<Banner>`), `$latestPosts` (`Collection<Post>`). |
@@ -49,6 +49,7 @@ của module. `{module-key}` là khóa trong `config('modules')` (`services`,
 | `gallery::nav-item` | `modules/gallery/nav-item.blade.php` | Không có. |
 | `gallery::home-section` | `modules/gallery/home-section.blade.php` | `$albums` (`Collection<GalleryAlbum>`). |
 | `gallery::components.album-card` | `modules/gallery/components/album-card.blade.php` | `$album` (`GalleryAlbum`). |
+| `floating_contact::widget` | `modules/floating-contact/widget.blade.php` | `$callUrl` (string\|null), `$zaloUrl` (string\|null), `$messengerUrl` (string\|null), `$position` (string: `'left'` hoặc `'right'`). View này được cắm qua `registerLayoutPartial('body_end', ...)`, không phải route — chỉ render khi ít nhất 1 trong 3 URL khác null. |
 
 Module mới thêm `route_prefixes`/entry trong `config/modules.php` thì bổ sung
 luôn dòng tương ứng ở bảng này — không bắt buộc nhưng giúp

@@ -1,5 +1,6 @@
 <?php
 
+use App\Modules\FloatingContact\FloatingContactServiceProvider;
 use App\Modules\Gallery\GalleryServiceProvider;
 use App\Modules\Services\ServicesServiceProvider;
 
@@ -40,6 +41,15 @@ return [
         'namespace' => 'App\\Modules\\Gallery',
         'route_prefixes' => ['gallery'],
         'label' => 'Thư viện ảnh',
+    ],
+
+    'floating_contact' => [
+        'enabled' => (bool) env('MODULE_FLOATING_CONTACT', false),
+        'provider' => FloatingContactServiceProvider::class,
+        'path' => app_path('Modules/FloatingContact'),
+        'namespace' => 'App\\Modules\\FloatingContact',
+        'route_prefixes' => [],
+        'label' => 'Nút liên hệ nổi',
     ],
 
 ];

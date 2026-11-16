@@ -28,5 +28,9 @@
     </main>
 
     @include('layouts.footer')
+
+    @foreach (module_registry()->layoutPartials('body_end') as $item)
+        @include($item['view'], $item['data'])
+    @endforeach
 </body>
 </html>

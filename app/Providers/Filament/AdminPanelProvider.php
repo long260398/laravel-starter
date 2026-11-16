@@ -46,18 +46,34 @@ class AdminPanelProvider extends PanelProvider
                 AccountWidget::class,
             ]);
 
-        // Resource của mỗi module bật được discover riêng từ thư mục Filament/Resources
-        // của module đó — không hardcode tên module nào ở đây. discoverResources() gộp
-        // thêm vào danh sách đã có (của core), không thay thế.
+        // Resource/Page/Widget của mỗi module bật được discover riêng từ thư mục
+        // Filament/{Resources,Pages,Widgets} của module đó — không hardcode tên
+        // module nào ở đây. Các discover*() gộp thêm vào danh sách đã có (của
+        // core), không thay thế.
         foreach (config('modules', []) as $module) {
             if (! ($module['enabled'] ?? false)) {
                 continue;
             }
 
-            $resourcesPath = rtrim($module['path'], '/\\').'/Filament/Resources';
+            $modulePath = rtrim($module['path'], '/\\');
+            $moduleNamespace = $module['namespace'];
+
+            $resourcesPath = $modulePath.'/Filament/Resources';
 
             if (is_dir($resourcesPath)) {
-                $panel->discoverResources(in: $resourcesPath, for: $module['namespace'].'\\Filament\\Resources');
+                $panel->discoverResources(in: $resourcesPath, for: $moduleNamespace.'\\Filament\\Resources');
+            }
+
+            $pagesPath = $modulePath.'/Filament/Pages';
+
+            if (is_dir($pagesPath)) {
+                $panel->discoverPages(in: $pagesPath, for: $moduleNamespace.'\\Filament\\Pages');
+            }
+
+            $widgetsPath = $modulePath.'/Filament/Widgets';
+
+            if (is_dir($widgetsPath)) {
+                $panel->discoverWidgets(in: $widgetsPath, for: $moduleNamespace.'\\Filament\\Widgets');
             }
         }
 

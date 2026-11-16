@@ -8,6 +8,7 @@ use App\Models\StaticPage;
 use App\Modules\Gallery\Models\GalleryAlbum;
 use App\Modules\Services\Models\Service;
 use App\Modules\Services\Models\ServiceCategory;
+use App\Support\Modules\ModuleRegistry;
 use App\Support\Theme\ThemeViewResolver;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\File;
@@ -59,6 +60,32 @@ class ThemeContractTest extends TestCase
 
                 $this->renderOrFail($theme, $relativePath, fn () => view($this->toViewName($relativePath), $data)->render());
             }
+        }
+    }
+
+    public function test_layouts_app_renders_body_end_slot_for_every_theme(): void
+    {
+        app(ModuleRegistry::class)->registerLayoutPartial('body_end', 'floating_contact::widget', [
+            'callUrl' => 'tel:0909123456',
+            'zaloUrl' => null,
+            'messengerUrl' => null,
+            'position' => 'right',
+        ]);
+
+        foreach ($this->discoverThemes() as $theme) {
+            app(ThemeViewResolver::class)->apply($theme);
+
+            $html = '';
+
+            $this->renderOrFail($theme, 'layouts/app.blade.php', function () use (&$html): void {
+                $html = view('layouts.app')->render();
+            });
+
+            $this->assertStringContainsString(
+                'aria-label="Gọi điện"',
+                $html,
+                "Theme [{$theme}] không render slot body_end ở layouts.app (thiếu module_registry()->layoutPartials('body_end'))."
+            );
         }
     }
 
@@ -211,6 +238,12 @@ class ThemeContractTest extends TestCase
             'gallery/nav-item.blade.php' => ['gallery::nav-item', []],
             'gallery/home-section.blade.php' => ['gallery::home-section', ['albums' => collect([$album])]],
             'gallery/components/album-card.blade.php' => ['gallery::components.album-card', ['album' => $album]],
+            'floating-contact/widget.blade.php' => ['floating_contact::widget', [
+                'callUrl' => 'tel:0909123456',
+                'zaloUrl' => 'https://zalo.me/0909123456',
+                'messengerUrl' => 'https://m.me/spa.abc',
+                'position' => 'right',
+            ]],
         ];
     }
 }

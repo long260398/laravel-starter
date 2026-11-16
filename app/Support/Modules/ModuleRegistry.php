@@ -25,6 +25,11 @@ class ModuleRegistry
     private array $homeSections = [];
 
     /**
+     * @var array<string, array<int, array{view: string, data: array<string, mixed>|Closure, priority: int}>>
+     */
+    private array $layoutPartials = [];
+
+    /**
      * @var array<int, callable(): iterable<array{loc: string, lastmod: mixed}>>
      */
     private array $sitemapProviders = [];
@@ -43,6 +48,14 @@ class ModuleRegistry
     public function registerHomeSection(string $view, array|Closure $data = [], int $priority = 0): void
     {
         $this->homeSections[] = ['view' => $view, 'data' => $data, 'priority' => $priority];
+    }
+
+    /**
+     * @param  array<string, mixed>|Closure  $data
+     */
+    public function registerLayoutPartial(string $slot, string $view, array|Closure $data = [], int $priority = 0): void
+    {
+        $this->layoutPartials[$slot][] = ['view' => $view, 'data' => $data, 'priority' => $priority];
     }
 
     /**
@@ -67,6 +80,14 @@ class ModuleRegistry
     public function homeSections(): array
     {
         return $this->resolved($this->homeSections);
+    }
+
+    /**
+     * @return array<int, array{view: string, data: array<string, mixed>}>
+     */
+    public function layoutPartials(string $slot): array
+    {
+        return $this->resolved($this->layoutPartials[$slot] ?? []);
     }
 
     public function sitemapUrls(): Collection
