@@ -1,11 +1,14 @@
 @php
-    $socialLinks = [
+    $socialLinks = array_filter([
         'Facebook' => setting('facebook_url'),
         'Zalo' => setting('zalo_url'),
         'TikTok' => setting('tiktok_url'),
         'YouTube' => setting('youtube_url'),
         'Messenger' => setting('messenger_url'),
-    ];
+    ]);
+
+    $hasContactInfo = filled(setting('address')) || filled(setting('hotline'))
+        || filled(setting('contact_email')) || filled(setting('working_hours'));
 @endphp
 
 <footer class="mt-auto border-t border-brand-100 bg-surface-muted">
@@ -17,49 +20,51 @@
                 <p class="mt-1 text-sm text-ink-muted">{{ setting('slogan') }}</p>
             @endif
 
-            <dl class="mt-4 space-y-1 text-sm text-ink">
-                @if (setting('address'))
-                    <div class="flex gap-2">
-                        <dt class="font-medium">Địa chỉ:</dt>
-                        <dd>{{ setting('address') }}</dd>
-                    </div>
-                @endif
+            @if ($hasContactInfo)
+                <dl class="mt-4 space-y-1 text-sm text-ink">
+                    @if (setting('address'))
+                        <div class="flex gap-2">
+                            <dt class="font-medium">Địa chỉ:</dt>
+                            <dd>{{ setting('address') }}</dd>
+                        </div>
+                    @endif
 
-                @if (setting('hotline'))
-                    <div class="flex gap-2">
-                        <dt class="font-medium">Hotline:</dt>
-                        <dd><a href="tel:{{ setting('hotline') }}" class="hover:text-brand-600">{{ setting('hotline') }}</a></dd>
-                    </div>
-                @endif
+                    @if (setting('hotline'))
+                        <div class="flex gap-2">
+                            <dt class="font-medium">Hotline:</dt>
+                            <dd><a href="tel:{{ setting('hotline') }}" class="hover:text-brand-600">{{ setting('hotline') }}</a></dd>
+                        </div>
+                    @endif
 
-                @if (setting('contact_email'))
-                    <div class="flex gap-2">
-                        <dt class="font-medium">Email:</dt>
-                        <dd><a href="mailto:{{ setting('contact_email') }}" class="hover:text-brand-600">{{ setting('contact_email') }}</a></dd>
-                    </div>
-                @endif
+                    @if (setting('contact_email'))
+                        <div class="flex gap-2">
+                            <dt class="font-medium">Email:</dt>
+                            <dd><a href="mailto:{{ setting('contact_email') }}" class="hover:text-brand-600">{{ setting('contact_email') }}</a></dd>
+                        </div>
+                    @endif
 
-                @if (setting('working_hours'))
-                    <div class="flex gap-2">
-                        <dt class="font-medium">Giờ làm việc:</dt>
-                        <dd>{{ setting('working_hours') }}</dd>
-                    </div>
-                @endif
-            </dl>
+                    @if (setting('working_hours'))
+                        <div class="flex gap-2">
+                            <dt class="font-medium">Giờ làm việc:</dt>
+                            <dd>{{ setting('working_hours') }}</dd>
+                        </div>
+                    @endif
+                </dl>
+            @endif
         </div>
 
-        <div class="md:text-right">
-            <p class="text-sm font-medium text-ink">Kết nối với chúng tôi</p>
-            <div class="mt-3 flex flex-wrap gap-4 md:justify-end">
-                @foreach ($socialLinks as $label => $url)
-                    @if ($url)
+        @if ($socialLinks !== [])
+            <div class="md:text-right">
+                <p class="text-sm font-medium text-ink">Kết nối với chúng tôi</p>
+                <div class="mt-3 flex flex-wrap gap-4 md:justify-end">
+                    @foreach ($socialLinks as $label => $url)
                         <a href="{{ $url }}" target="_blank" rel="noopener noreferrer" class="text-sm text-ink hover:text-brand-600">
                             {{ $label }}
                         </a>
-                    @endif
-                @endforeach
+                    @endforeach
+                </div>
             </div>
-        </div>
+        @endif
     </div>
 
     <div class="border-t border-brand-100 py-4 text-center text-xs text-ink-muted">

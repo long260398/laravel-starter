@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\ContactMessages;
 
 use App\Enums\ContactStatus;
+use App\Enums\NavigationGroup;
 use App\Filament\Resources\ContactMessages\Pages\EditContactMessage;
 use App\Filament\Resources\ContactMessages\Pages\ListContactMessages;
 use App\Filament\Resources\ContactMessages\Schemas\ContactMessageForm;
@@ -13,6 +14,7 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use UnitEnum;
 
 class ContactMessageResource extends Resource
 {
@@ -21,6 +23,10 @@ class ContactMessageResource extends Resource
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedEnvelope;
 
     protected static ?string $recordTitleAttribute = 'name';
+
+    protected static bool $hasTitleCaseModelLabel = false;
+
+    protected static string|UnitEnum|null $navigationGroup = NavigationGroup::Customers;
 
     public static function getModelLabel(): string
     {

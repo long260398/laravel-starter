@@ -1,5 +1,5 @@
 @php
-    $seoTitle = $seoTitle ?? setting('seo_title') ?? setting('site_name');
+    $seoTitle = $seoTitle ?? setting('seo_title') ?? setting('site_name', config('app.name'));
     $seoDescription = $seoDescription ?? setting('seo_description');
     $ogImageUrl = $ogImageUrl ?? public_file_url(setting('og_image'));
     $canonicalUrl = $canonicalUrl ?? url()->current();

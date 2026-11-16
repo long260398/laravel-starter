@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\StaticPages;
 
+use App\Enums\NavigationGroup;
 use App\Filament\Resources\StaticPages\Pages\CreateStaticPage;
 use App\Filament\Resources\StaticPages\Pages\EditStaticPage;
 use App\Filament\Resources\StaticPages\Pages\ListStaticPages;
@@ -15,6 +16,7 @@ use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use UnitEnum;
 
 class StaticPageResource extends Resource
 {
@@ -23,6 +25,10 @@ class StaticPageResource extends Resource
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedDocumentText;
 
     protected static ?string $recordTitleAttribute = 'title';
+
+    protected static bool $hasTitleCaseModelLabel = false;
+
+    protected static string|UnitEnum|null $navigationGroup = NavigationGroup::Content;
 
     public static function getModelLabel(): string
     {

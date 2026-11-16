@@ -2,7 +2,7 @@
 
 @section('content')
     @php
-        $seoTitle = $page->meta_title ?: ($page->title.' - '.setting('site_name'));
+        $seoTitle = $page->meta_title ?: ($page->title.' - '.setting('site_name', config('app.name')));
         $seoDescription = $page->meta_description ?: str($page->content)->stripTags()->squish()->limit(160);
         $ogImageUrl = public_file_url($page->featured_image);
     @endphp

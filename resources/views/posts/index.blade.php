@@ -2,7 +2,7 @@
 
 @section('content')
     @php
-        $seoTitle = 'Tin tức - '.setting('site_name');
+        $seoTitle = 'Tin tức - '.setting('site_name', config('app.name'));
     @endphp
 
     <section class="mx-auto max-w-6xl px-4 py-10">

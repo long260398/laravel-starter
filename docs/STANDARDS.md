@@ -56,6 +56,8 @@ Tính năng riêng theo ngành (Dịch vụ, Sản phẩm...) là module độc 
 
 ## Giao diện
 - Admin dùng tiếng Việt (APP_LOCALE=vi); label, thông báo, tên menu viết tiếng Việt.
+- Mọi Filament resource (core và module) phải đặt `protected static bool $hasTitleCaseModelLabel = false;` — Filament mặc định viết hoa từng chữ (`Str::ucwords()`) label cho breadcrumb/modal, làm sai label tiếng Việt (ví dụ "Bài Viết" thay vì "Bài viết").
+- Mọi Filament resource/page (core và module) phải đặt `$navigationGroup` bằng enum `App\Enums\NavigationGroup` (`Content`, `Customers`, `System`), không gõ chuỗi tên nhóm trực tiếp — gõ sai chuỗi sẽ sinh ra 2 nhóm navigation trùng nghĩa khác tên. Thứ tự nhóm hiển thị khai báo một lần ở `AdminPanelProvider::navigationGroups()`.
 
 ## Routing / URL
 - Route cố định do hệ thống định nghĩa (không phải slug nội dung do người dùng nhập) dùng tiếng Anh: `/blog`, `/contact`, `/sitemap.xml`, `/robots.txt`...

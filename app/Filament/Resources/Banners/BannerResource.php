@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Banners;
 
+use App\Enums\NavigationGroup;
 use App\Filament\Resources\Banners\Pages\CreateBanner;
 use App\Filament\Resources\Banners\Pages\EditBanner;
 use App\Filament\Resources\Banners\Pages\ListBanners;
@@ -15,6 +16,7 @@ use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use UnitEnum;
 
 class BannerResource extends Resource
 {
@@ -23,6 +25,10 @@ class BannerResource extends Resource
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedPhoto;
 
     protected static ?string $recordTitleAttribute = 'title';
+
+    protected static bool $hasTitleCaseModelLabel = false;
+
+    protected static string|UnitEnum|null $navigationGroup = NavigationGroup::Content;
 
     public static function getModelLabel(): string
     {

@@ -2,7 +2,7 @@
 
 @section('content')
     @php
-        $seoTitle = 'Liên hệ - '.setting('site_name');
+        $seoTitle = 'Liên hệ - '.setting('site_name', config('app.name'));
     @endphp
 
     <section class="mx-auto max-w-2xl px-4 py-10">

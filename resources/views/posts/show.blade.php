@@ -2,7 +2,7 @@
 
 @section('content')
     @php
-        $seoTitle = $post->title.' - '.setting('site_name');
+        $seoTitle = $post->title.' - '.setting('site_name', config('app.name'));
         $seoDescription = str($post->content)->stripTags()->squish()->limit(160);
         $ogImageUrl = public_file_url($post->featured_image);
         $ogType = 'article';

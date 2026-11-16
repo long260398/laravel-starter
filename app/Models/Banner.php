@@ -53,22 +53,32 @@ class Banner extends Model
     }
 
     /**
-     * Banner đã xuất bản, đang trong khoảng thời gian hiển thị (null = không giới hạn)
-     * và đúng vị trí `$position`, sắp theo `sort_order`. Dùng để lấy banner cho frontend.
+     * Banner đã xuất bản và đang trong khoảng thời gian hiển thị (null = không
+     * giới hạn), bất kể vị trí. Dùng cho thống kê/đếm banner đang hiển thị.
      */
-    public function scopeVisibleAt(Builder $query, string $position): Builder
+    public function scopeVisible(Builder $query): Builder
     {
         $now = now();
 
         return $query
-            ->where('position', $position)
             ->where('status', PublishStatus::Published)
             ->where(function (Builder $query) use ($now): void {
                 $query->whereNull('starts_at')->orWhere('starts_at', '<=', $now);
             })
             ->where(function (Builder $query) use ($now): void {
                 $query->whereNull('ends_at')->orWhere('ends_at', '>=', $now);
-            })
+            });
+    }
+
+    /**
+     * Banner đang hiển thị ở đúng vị trí `$position`, sắp theo `sort_order`.
+     * Dùng để lấy banner cho frontend.
+     */
+    public function scopeVisibleAt(Builder $query, string $position): Builder
+    {
+        return $query
+            ->visible()
+            ->where('position', $position)
             ->orderBy('sort_order');
     }
 
