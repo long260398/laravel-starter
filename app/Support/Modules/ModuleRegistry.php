@@ -35,6 +35,11 @@ class ModuleRegistry
     private array $sitemapProviders = [];
 
     /**
+     * @var array<int, callable(): array<string, array{0: string, 1: array<string, mixed>}>>
+     */
+    private array $themeViewContractProviders = [];
+
+    /**
      * @param  array<string, mixed>|Closure  $data
      */
     public function registerNavItem(string $view, array|Closure $data = [], int $priority = 0): void
@@ -67,6 +72,19 @@ class ModuleRegistry
     }
 
     /**
+     * Module tự khai báo hợp đồng view theme có thể override được: theme cho
+     * đường dẫn view (vd `services/home-section.blade.php`) và dữ liệu mẫu để
+     * `ThemeContractTest` render thử. Core (`docs/THEME-CONTRACT.md` mục 1,
+     * `ThemeContractTest`) không còn hardcode danh sách này theo tên module.
+     *
+     * @param  callable(): array<string, array{0: string, 1: array<string, mixed>}>  $provider
+     */
+    public function registerThemeViewContract(callable $provider): void
+    {
+        $this->themeViewContractProviders[] = $provider;
+    }
+
+    /**
      * @return array<int, array{view: string, data: array<string, mixed>}>
      */
     public function navItems(): array
@@ -93,6 +111,16 @@ class ModuleRegistry
     public function sitemapUrls(): Collection
     {
         return collect($this->sitemapProviders)->flatMap(fn (callable $provider) => $provider());
+    }
+
+    /**
+     * @return array<string, array{0: string, 1: array<string, mixed>}>
+     */
+    public function themeViewContracts(): array
+    {
+        return collect($this->themeViewContractProviders)
+            ->map(fn (callable $provider): array => $provider())
+            ->reduce(fn (array $carry, array $item): array => $carry + $item, []);
     }
 
     /**

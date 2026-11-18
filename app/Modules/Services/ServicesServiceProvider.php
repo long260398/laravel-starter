@@ -40,5 +40,22 @@ class ServicesServiceProvider extends ServiceProvider
                 'lastmod' => $service->updated_at,
             ],
         ));
+
+        $registry->registerThemeViewContract(function (): array {
+            $category = ServiceCategory::factory()->published()->create();
+            $service = Service::factory()->published()->for($category, 'category')->create();
+
+            return [
+                'services/index.blade.php' => ['services::index', [
+                    'categories' => collect([$category]),
+                    'services' => collect([$service]),
+                    'activeCategory' => '',
+                ]],
+                'services/show.blade.php' => ['services::show', ['service' => $service]],
+                'services/nav-item.blade.php' => ['services::nav-item', []],
+                'services/home-section.blade.php' => ['services::home-section', ['services' => collect([$service])]],
+                'services/components/service-card.blade.php' => ['services::components.service-card', ['service' => $service]],
+            ];
+        });
     }
 }

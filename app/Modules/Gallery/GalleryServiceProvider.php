@@ -40,5 +40,17 @@ class GalleryServiceProvider extends ServiceProvider
                 'lastmod' => $album->updated_at,
             ],
         ));
+
+        $registry->registerThemeViewContract(function (): array {
+            $album = GalleryAlbum::factory()->published()->create();
+
+            return [
+                'gallery/index.blade.php' => ['gallery::index', ['albums' => collect([$album])]],
+                'gallery/show.blade.php' => ['gallery::show', ['album' => $album]],
+                'gallery/nav-item.blade.php' => ['gallery::nav-item', []],
+                'gallery/home-section.blade.php' => ['gallery::home-section', ['albums' => collect([$album])]],
+                'gallery/components/album-card.blade.php' => ['gallery::components.album-card', ['album' => $album]],
+            ];
+        });
     }
 }

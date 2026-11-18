@@ -33,5 +33,14 @@ class FloatingContactServiceProvider extends ServiceProvider
                 : null,
             'position' => setting('floating_contact.position', 'right'),
         ]);
+
+        $registry->registerThemeViewContract(fn (): array => [
+            'floating-contact/widget.blade.php' => ['floating_contact::widget', [
+                'callUrl' => 'tel:0909123456',
+                'zaloUrl' => 'https://zalo.me/0909123456',
+                'messengerUrl' => 'https://m.me/spa.abc',
+                'position' => 'right',
+            ]],
+        ]);
     }
 }

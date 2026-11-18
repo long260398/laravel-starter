@@ -1,8 +1,10 @@
 <?php
 
+use App\Modules\Faq\FaqServiceProvider;
 use App\Modules\FloatingContact\FloatingContactServiceProvider;
 use App\Modules\Gallery\GalleryServiceProvider;
 use App\Modules\Services\ServicesServiceProvider;
+use App\Modules\Testimonials\TestimonialsServiceProvider;
 
 return [
 
@@ -50,6 +52,24 @@ return [
         'namespace' => 'App\\Modules\\FloatingContact',
         'route_prefixes' => [],
         'label' => 'Nút liên hệ nổi',
+    ],
+
+    'testimonials' => [
+        'enabled' => (bool) env('MODULE_TESTIMONIALS', false),
+        'provider' => TestimonialsServiceProvider::class,
+        'path' => app_path('Modules/Testimonials'),
+        'namespace' => 'App\\Modules\\Testimonials',
+        'route_prefixes' => [],
+        'label' => 'Cảm nhận khách hàng',
+    ],
+
+    'faq' => [
+        'enabled' => (bool) env('MODULE_FAQ', false),
+        'provider' => FaqServiceProvider::class,
+        'path' => app_path('Modules/Faq'),
+        'namespace' => 'App\\Modules\\Faq',
+        'route_prefixes' => ['faq'],
+        'label' => 'Câu hỏi thường gặp',
     ],
 
 ];

@@ -35,25 +35,50 @@ Theme khác chỉ cần có view nào muốn ghi đè — thiếu thì tự fall
 
 Đặt tại `views/modules/{module-key}/...` — đường dẫn con khớp y hệt view gốc
 của module. `{module-key}` là khóa trong `config('modules')` (`services`,
-`gallery`).
+`gallery`...).
 
-| View gốc | File override | Biến nhận được |
-|---|---|---|
-| `services::index` | `modules/services/index.blade.php` | `$categories` (`Collection<ServiceCategory>`), `$services` (`Collection<Service>`), `$activeCategory` (string). |
-| `services::show` | `modules/services/show.blade.php` | `$service` (`Service`). |
-| `services::nav-item` | `modules/services/nav-item.blade.php` | Không có. |
-| `services::home-section` | `modules/services/home-section.blade.php` | `$services` (`Collection<Service>`). |
-| `services::components.service-card` | `modules/services/components/service-card.blade.php` | `$service` (`Service`). |
-| `gallery::index` | `modules/gallery/index.blade.php` | `$albums` (`Collection<GalleryAlbum>`). |
-| `gallery::show` | `modules/gallery/show.blade.php` | `$album` (`GalleryAlbum`, đã `load('images')`). |
-| `gallery::nav-item` | `modules/gallery/nav-item.blade.php` | Không có. |
-| `gallery::home-section` | `modules/gallery/home-section.blade.php` | `$albums` (`Collection<GalleryAlbum>`). |
-| `gallery::components.album-card` | `modules/gallery/components/album-card.blade.php` | `$album` (`GalleryAlbum`). |
-| `floating_contact::widget` | `modules/floating-contact/widget.blade.php` | `$callUrl` (string\|null), `$zaloUrl` (string\|null), `$messengerUrl` (string\|null), `$position` (string: `'left'` hoặc `'right'`). View này được cắm qua `registerLayoutPartial('body_end', ...)`, không phải route — chỉ render khi ít nhất 1 trong 3 URL khác null. |
+Danh sách view module nào override được, và biến mỗi view nhận, **không
+hardcode ở đây hay ở core** — mỗi module tự khai báo "hợp đồng" của chính nó
+bằng cách gọi `ModuleRegistry::registerThemeViewContract(callable $provider)`
+trong `boot()` của `{Tên}ServiceProvider`. `$provider` là 1 callable không
+nhận tham số, trả về mảng:
 
-Module mới thêm `route_prefixes`/entry trong `config/modules.php` thì bổ sung
-luôn dòng tương ứng ở bảng này — không bắt buộc nhưng giúp
-`ThemeContractTest` biết view nào hợp lệ để test khi có theme override.
+```php
+[
+    '{module-key}/{đường dẫn y hệt view gốc}.blade.php' => [
+        '{logical-view}', // vd 'services::home-section'
+        ['bien' => $giaTriMau], // dữ liệu mẫu để test render thử
+    ],
+    // ... có thể khai nhiều view trong 1 provider
+]
+```
+
+Ví dụ (`ServicesServiceProvider::boot()`):
+
+```php
+$registry->registerThemeViewContract(function (): array {
+    $category = ServiceCategory::factory()->published()->create();
+    $service = Service::factory()->published()->for($category, 'category')->create();
+
+    return [
+        'services/home-section.blade.php' => ['services::home-section', [
+            'services' => collect([$service]),
+        ]],
+        // ...
+    ];
+});
+```
+
+`ThemeContractTest` đọc lại toàn bộ qua `module_registry()->themeViewContracts()`
+để biết: (a) view nào theme được phép override (`test_theme_does_not_ship_views_outside_the_contract`),
+(b) dữ liệu mẫu nào dùng để render thử khi theme có override
+(`test_module_view_overrides_render_with_sample_data_when_present`). Theme
+override 1 view mà module chưa khai báo contract sẽ bị test coi là "view
+ngoài hợp đồng" và fail — không cần core biết tên module nào tồn tại.
+
+Dữ liệu mẫu được bọc trong Closure, chỉ chạy khi `ThemeContractTest` gọi
+(giống cách `registerHomeSection`/`registerLayoutPartial` dùng Closure để lazy
+— factory tạo bản ghi mẫu không chạy ở mọi request thật, chỉ chạy trong test).
 
 ## 3. Không thuộc theme (core, cố định)
 

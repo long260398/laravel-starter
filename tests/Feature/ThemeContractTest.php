@@ -5,9 +5,6 @@ namespace Tests\Feature;
 use App\Models\Banner;
 use App\Models\Post;
 use App\Models\StaticPage;
-use App\Modules\Gallery\Models\GalleryAlbum;
-use App\Modules\Services\Models\Service;
-use App\Modules\Services\Models\ServiceCategory;
 use App\Support\Modules\ModuleRegistry;
 use App\Support\Theme\ThemeViewResolver;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -31,6 +28,12 @@ use Throwable;
  * trỏ đúng theme đang kiểm tra — nhờ vậy view lồng nhau (`layouts.header`,
  * `layouts.footer`...) cũng resolve/fallback đúng như lúc chạy thật, không
  * cần tách riêng theo file vật lý.
+ *
+ * Danh sách view module override được (mục 2 của hợp đồng) KHÔNG hardcode ở
+ * đây — mỗi module tự khai báo qua `ModuleRegistry::registerThemeViewContract()`
+ * trong `boot()` (xem `ServicesServiceProvider`, `GalleryServiceProvider`,
+ * `FloatingContactServiceProvider`). Test này chỉ đọc lại qua
+ * `module_registry()->themeViewContracts()`.
  */
 class ThemeContractTest extends TestCase
 {
@@ -144,6 +147,64 @@ class ThemeContractTest extends TestCase
         }
     }
 
+    public function test_fake_theme_overriding_a_declared_module_view_contract_passes(): void
+    {
+        $theme = '_fixture_declared';
+
+        $this->makeFixtureThemeView(
+            $theme,
+            'modules/testimonials/home-section.blade.php',
+            '<p>{{ $testimonials->count() }}</p>',
+        );
+
+        try {
+            $samples = $this->moduleViewSamples();
+
+            $this->assertArrayHasKey(
+                'testimonials/home-section.blade.php',
+                $samples,
+                'Module Testimonials chưa khai báo registerThemeViewContract() cho home-section.'
+            );
+
+            app(ThemeViewResolver::class)->apply($theme);
+
+            [$view, $data] = $samples['testimonials/home-section.blade.php'];
+
+            $this->renderOrFail($theme, 'modules/testimonials/home-section.blade.php', fn () => view($view, $data)->render());
+
+            $this->assertContains(
+                'testimonials/home-section.blade.php',
+                array_keys($samples),
+                'View module đã khai báo hợp đồng phải được coi là hợp lệ để theme override.'
+            );
+        } finally {
+            $this->removeFixtureTheme($theme);
+        }
+    }
+
+    public function test_fake_theme_overriding_an_undeclared_module_view_fails_contract(): void
+    {
+        $theme = '_fixture_undeclared';
+
+        $this->makeFixtureThemeView(
+            $theme,
+            'modules/testimonials/not-declared.blade.php',
+            '<p>không hợp lệ</p>',
+        );
+
+        try {
+            $allowedModules = array_keys($this->moduleViewSamples());
+
+            $this->assertNotContains(
+                'testimonials/not-declared.blade.php',
+                $allowedModules,
+                'View module chưa được module khai báo qua registerThemeViewContract() không được coi là hợp lệ.'
+            );
+        } finally {
+            $this->removeFixtureTheme($theme);
+        }
+    }
+
     /**
      * @return array<int, string>
      */
@@ -215,35 +276,31 @@ class ThemeContractTest extends TestCase
     }
 
     /**
+     * Nguồn sự thật là chính các module (`ModuleRegistry::registerThemeViewContract()`),
+     * không hardcode ở test — thêm module mới không cần sửa file này.
+     *
      * @return array<string, array{0: string, 1: array<string, mixed>}>
      */
     private function moduleViewSamples(): array
     {
-        $category = ServiceCategory::factory()->published()->create();
-        $service = Service::factory()->published()->for($category, 'category')->create();
-        $album = GalleryAlbum::factory()->published()->create();
+        return app(ModuleRegistry::class)->themeViewContracts();
+    }
 
-        return [
-            'services/index.blade.php' => ['services::index', [
-                'categories' => collect([$category]),
-                'services' => collect([$service]),
-                'activeCategory' => '',
-            ]],
-            'services/show.blade.php' => ['services::show', ['service' => $service]],
-            'services/nav-item.blade.php' => ['services::nav-item', []],
-            'services/home-section.blade.php' => ['services::home-section', ['services' => collect([$service])]],
-            'services/components/service-card.blade.php' => ['services::components.service-card', ['service' => $service]],
-            'gallery/index.blade.php' => ['gallery::index', ['albums' => collect([$album])]],
-            'gallery/show.blade.php' => ['gallery::show', ['album' => $album]],
-            'gallery/nav-item.blade.php' => ['gallery::nav-item', []],
-            'gallery/home-section.blade.php' => ['gallery::home-section', ['albums' => collect([$album])]],
-            'gallery/components/album-card.blade.php' => ['gallery::components.album-card', ['album' => $album]],
-            'floating-contact/widget.blade.php' => ['floating_contact::widget', [
-                'callUrl' => 'tel:0909123456',
-                'zaloUrl' => 'https://zalo.me/0909123456',
-                'messengerUrl' => 'https://m.me/spa.abc',
-                'position' => 'right',
-            ]],
-        ];
+    /**
+     * Tạo 1 view tạm trong `resources/themes/{$theme}/views/{$relativePath}` để
+     * kiểm chứng cơ chế hợp đồng tự khai báo — tự xóa theme này ở cuối test
+     * (xem `removeFixtureTheme()`), không phải theme thật của dự án.
+     */
+    private function makeFixtureThemeView(string $theme, string $relativePath, string $contents): void
+    {
+        $path = $this->themePath($theme, $relativePath);
+
+        File::ensureDirectoryExists(dirname($path));
+        File::put($path, $contents);
+    }
+
+    private function removeFixtureTheme(string $theme): void
+    {
+        File::deleteDirectory(resource_path("themes/{$theme}"));
     }
 }
