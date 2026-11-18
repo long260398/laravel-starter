@@ -1,0 +1,82 @@
+@import 'tailwindcss';
+
+/*
+ * Self-host Lora (tiêu đề) và Be Vietnam Pro (nội dung) qua @fontsource — không
+ * dùng Google Fonts CDN. Chỉ import subset latin + vietnamese, không import
+ * file tổng hợp (vd "500.css") vì nó kéo theo cyrillic/greek... không dùng tới.
+ */
+@import '@fontsource/lora/latin-500.css';
+@import '@fontsource/lora/vietnamese-500.css';
+@import '@fontsource/lora/latin-500-italic.css';
+@import '@fontsource/lora/vietnamese-500-italic.css';
+@import '@fontsource/lora/latin-600.css';
+@import '@fontsource/lora/vietnamese-600.css';
+
+@import '@fontsource/be-vietnam-pro/latin-400.css';
+@import '@fontsource/be-vietnam-pro/vietnamese-400.css';
+@import '@fontsource/be-vietnam-pro/latin-500.css';
+@import '@fontsource/be-vietnam-pro/vietnamese-500.css';
+@import '@fontsource/be-vietnam-pro/latin-600.css';
+@import '@fontsource/be-vietnam-pro/vietnamese-600.css';
+
+@source '../views/**/*.blade.php';
+@source '../../default/views/**/*.blade.php';
+@source '../../../../app/Modules/*/resources/views/**/*.blade.php';
+@source '../../../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../../../storage/framework/views/*.php';
+
+/*
+ * spa-natural: thiên nhiên, thư thái, ấm — xem docs/themes/spa-natural.md.
+ */
+@theme {
+    --font-sans: 'Be Vietnam Pro', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
+        'Segoe UI Symbol', 'Noto Color Emoji';
+    --font-serif: 'Lora', ui-serif, Georgia, serif;
+
+    --color-surface: #F6F3EC;
+    --color-surface-alt: #ECE6DA;
+    --color-card: #FFFFFF;
+    --color-line: #E2DCCF;
+
+    --color-ink: #2B3328;
+    --color-ink-muted: #4A5246;
+
+    --color-brand: #4F6651;
+    --color-brand-dark: #3F5341;
+
+    --color-earth: #6B5444;
+    --color-earth-dark: #5A4536;
+
+    --color-footer: #2B3328;
+    --color-footer-ink: #E9E6DD;
+}
+
+/* Ảnh hero dạng vòm: bo tròn hẳn 2 góc trên, co giãn theo viewport. */
+.arch-top {
+    border-radius: clamp(64px, 10vw, 160px) clamp(64px, 10vw, 160px) 1.5rem 1.5rem;
+}
+
+/*
+ * Fade/reveal nhẹ khi phần tử vào viewport. Chỉ ẩn khi <html> có class "js"
+ * (thêm bằng script đồng bộ ở đầu <head>, xem layouts/app.blade.php) — JS
+ * không chạy thì nội dung hiện bình thường, không bao giờ kẹt ẩn vĩnh viễn.
+ * js/app.js thêm class "is-visible" khi phần tử vào viewport.
+ */
+html.js [data-reveal] {
+    opacity: 0;
+    transform: translateY(16px);
+    transition: opacity 350ms ease-out, transform 350ms ease-out;
+}
+
+html.js [data-reveal].is-visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    html.js [data-reveal] {
+        opacity: 1;
+        transform: none;
+        transition: none;
+    }
+}

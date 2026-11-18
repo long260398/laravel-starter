@@ -17,7 +17,7 @@ use Illuminate\Contracts\View\Factory;
  *   errors/404,500 của theme cũng fallback đúng thứ tự.
  * - View namespace của module (`services::`, `gallery::`): module vẫn tự
  *   `loadViewsFrom` như cũ; ở đây chỉ `replaceNamespace` để chèn thư mục
- *   override của theme (`{theme}/modules/{module}`) lên trước view gốc của
+ *   override của theme (`{theme}/views/modules/{module}`) lên trước view gốc của
  *   module — không cần quan tâm module provider boot trước hay sau.
  */
 class ThemeViewResolver
@@ -58,8 +58,8 @@ class ThemeViewResolver
             $originalPath = $module['path'].'/resources/views';
 
             $overrides = array_values(array_filter([
-                "{$base}/{$theme}/modules/{$key}",
-                $theme !== $default ? "{$base}/{$default}/modules/{$key}" : null,
+                "{$base}/{$theme}/views/modules/{$key}",
+                $theme !== $default ? "{$base}/{$default}/views/modules/{$key}" : null,
             ], fn (?string $path): bool => $path !== null && is_dir($path)));
 
             $finder->replaceNamespace($key, [...$overrides, $originalPath]);

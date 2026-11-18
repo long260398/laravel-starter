@@ -34,6 +34,7 @@ Timezone: Asia/Ho_Chi_Minh.
 - Không tải thư viện JS qua CDN; mọi package qua composer/npm.
 - Không thêm package mới khi chưa được duyệt; ưu tiên dùng thứ có sẵn trong Laravel/Filament.
 - Thêm package mới phải chạy `composer audit` / `npm audit`.
+- Rủi ro đã biết nhưng chưa vá được (không có bản fix, hoặc fix duy nhất đánh đổi không chấp nhận được) phải ghi vào `docs/SECURITY-NOTES.md` — không bỏ qua lặng lẽ. Mỗi lần chạy audit phải đối chiếu với file này.
 - Khi deploy sau proxy/CDN (Cloudflare...) phải cấu hình `TrustProxies` để rate limit theo đúng IP khách.
 
 ## Module tùy chọn
