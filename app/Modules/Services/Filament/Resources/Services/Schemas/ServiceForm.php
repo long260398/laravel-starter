@@ -3,8 +3,8 @@
 namespace App\Modules\Services\Filament\Resources\Services\Schemas;
 
 use App\Enums\PublishStatus;
+use App\Filament\Forms\Components\MediaPicker;
 use App\Modules\Services\Models\ServiceCategory;
-use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -40,7 +40,7 @@ class ServiceForm
                 TextInput::make('short_description')
                     ->label('Mô tả ngắn')
                     ->maxLength(255),
-                FileUpload::make('image')
+                MediaPicker::make('image')
                     ->label('Hình ảnh')
                     ->image()
                     ->disk('public')

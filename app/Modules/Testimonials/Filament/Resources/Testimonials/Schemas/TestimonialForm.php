@@ -3,7 +3,7 @@
 namespace App\Modules\Testimonials\Filament\Resources\Testimonials\Schemas;
 
 use App\Enums\PublishStatus;
-use Filament\Forms\Components\FileUpload;
+use App\Filament\Forms\Components\MediaPicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -23,7 +23,7 @@ class TestimonialForm
                     ->label('Chức danh / Mô tả')
                     ->maxLength(255)
                     ->placeholder('Vd: Khách hàng thân thiết'),
-                FileUpload::make('avatar')
+                MediaPicker::make('avatar')
                     ->label('Ảnh đại diện')
                     ->image()
                     ->disk('public')

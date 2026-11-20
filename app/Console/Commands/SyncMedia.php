@@ -32,7 +32,12 @@ class SyncMedia extends Command
     /**
      * @var array<int, string>
      */
-    private const array ALLOWED_DISK_SCAN_MIME_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+    private const array ALLOWED_DISK_SCAN_MIME_TYPES = [
+        'image/jpeg', 'image/png', 'image/webp', 'image/gif',
+        // favicon (MediaPicker của Settings chấp nhận cả 2 — hệ điều hành/thư
+        // viện fileinfo không đồng nhất mime trả về cho .ico):
+        'image/vnd.microsoft.icon', 'image/x-icon',
+    ];
 
     public function handle(): int
     {

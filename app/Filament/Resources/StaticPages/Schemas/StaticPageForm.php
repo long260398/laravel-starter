@@ -3,9 +3,9 @@
 namespace App\Filament\Resources\StaticPages\Schemas;
 
 use App\Enums\PublishStatus;
+use App\Filament\Forms\Components\MediaPicker;
 use App\Models\StaticPage;
 use Closure;
-use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -35,7 +35,7 @@ class StaticPageForm
                     ->maxLength(255)
                     ->rule(self::notReservedSlugRule())
                     ->helperText('Không được trùng với các đường dẫn hệ thống (admin, storage, sitemap.xml...).'),
-                FileUpload::make('featured_image')
+                MediaPicker::make('featured_image')
                     ->label('Ảnh đại diện')
                     ->image()
                     ->disk('public')

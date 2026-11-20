@@ -3,10 +3,10 @@
 namespace App\Filament\Resources\Banners\Schemas;
 
 use App\Enums\PublishStatus;
+use App\Filament\Forms\Components\MediaPicker;
 use App\Models\Banner;
 use Closure;
 use Filament\Forms\Components\DateTimePicker;
-use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
@@ -29,7 +29,7 @@ class BannerForm
                 TextInput::make('subtitle')
                     ->label('Phụ đề')
                     ->maxLength(255),
-                FileUpload::make('image')
+                MediaPicker::make('image')
                     ->label('Ảnh banner')
                     ->image()
                     ->required()
@@ -37,7 +37,7 @@ class BannerForm
                     ->directory('banners')
                     ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
                     ->maxSize(2048),
-                FileUpload::make('image_mobile')
+                MediaPicker::make('image_mobile')
                     ->label('Ảnh banner (mobile)')
                     ->image()
                     ->disk('public')

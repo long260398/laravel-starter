@@ -3,8 +3,8 @@
 namespace App\Filament\Resources\Posts\Schemas;
 
 use App\Enums\PublishStatus;
+use App\Filament\Forms\Components\MediaPicker;
 use Filament\Forms\Components\DateTimePicker;
-use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -31,7 +31,7 @@ class PostForm
                     ->required()
                     ->unique(ignoreRecord: true)
                     ->maxLength(255),
-                FileUpload::make('featured_image')
+                MediaPicker::make('featured_image')
                     ->label('Ảnh đại diện')
                     ->image()
                     ->disk('public')

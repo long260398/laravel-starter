@@ -4,11 +4,11 @@ namespace App\Filament\Pages;
 
 use App\Actions\SaveSettings;
 use App\Enums\NavigationGroup;
+use App\Filament\Forms\Components\MediaPicker;
 use App\Models\Setting;
 use BackedEnum;
 use Closure;
 use Filament\Actions\Action;
-use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
@@ -83,18 +83,18 @@ class Settings extends Page
                                 TextInput::make('slogan')
                                     ->label('Slogan')
                                     ->maxLength(255),
-                                FileUpload::make('logo')
+                                MediaPicker::make('logo', fn (): mixed => Setting::get('logo'))
                                     ->label('Logo')
                                     ->image()
                                     ->disk('public')
                                     ->directory('settings')
                                     ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
                                     ->maxSize(2048),
-                                FileUpload::make('favicon')
+                                MediaPicker::make('favicon', fn (): mixed => Setting::get('favicon'))
                                     ->label('Favicon')
                                     ->disk('public')
                                     ->directory('settings')
-                                    ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp', 'image/vnd.microsoft.icon'])
+                                    ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp', 'image/vnd.microsoft.icon', 'image/x-icon'])
                                     ->mimeTypeMap(['ico' => 'image/vnd.microsoft.icon'])
                                     ->maxSize(512),
                             ]),
@@ -156,7 +156,7 @@ class Settings extends Page
                                 Textarea::make('seo_description')
                                     ->label('Meta description')
                                     ->maxLength(500),
-                                FileUpload::make('og_image')
+                                MediaPicker::make('og_image', fn (): mixed => Setting::get('og_image'))
                                     ->label('Ảnh chia sẻ (OG image)')
                                     ->image()
                                     ->disk('public')

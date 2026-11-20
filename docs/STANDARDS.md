@@ -73,6 +73,7 @@ Frontend tách khỏi controller qua hệ thống theme — đổi giao diện c
 - URL file luôn sinh qua helper `public_file_url()`, không tự ghép chuỗi URL trong view hay controller.
 - Chỉ áp dụng cho code mới. Không refactor các chỗ cũ đang ghi cứng `'public'` — để task riêng sau.
 - Mọi file upload đều được ghi vào thư viện media qua `TracksMediaUsage`; file chỉ bị xóa từ Thư viện media khi không còn được dùng. Model mới có upload phải dùng trait này.
+- Ô ảnh trong admin dùng component MediaPicker (core); không dùng FileUpload trực tiếp cho ảnh.
 
 ## Giao diện
 - Admin dùng tiếng Việt (APP_LOCALE=vi); label, thông báo, tên menu viết tiếng Việt.
