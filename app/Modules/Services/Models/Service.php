@@ -2,8 +2,9 @@
 
 namespace App\Modules\Services\Models;
 
+use App\Contracts\HasMediaUsageLabel;
 use App\Enums\PublishStatus;
-use App\Models\Concerns\DeletesStoredFiles;
+use App\Models\Concerns\TracksMediaUsage;
 use App\Modules\Services\Database\Factories\ServiceFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Builder;
@@ -17,10 +18,10 @@ use Illuminate\Database\Eloquent\SoftDeletes;
     'service_category_id', 'name', 'slug', 'short_description', 'content', 'image',
     'price', 'price_note', 'duration', 'is_featured', 'status', 'sort_order',
 ])]
-class Service extends Model
+class Service extends Model implements HasMediaUsageLabel
 {
     /** @use HasFactory<ServiceFactory> */
-    use DeletesStoredFiles, HasFactory, SoftDeletes;
+    use HasFactory, SoftDeletes, TracksMediaUsage;
 
     /**
      * @var array<string, string>

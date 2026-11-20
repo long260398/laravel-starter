@@ -2,8 +2,9 @@
 
 namespace App\Models;
 
+use App\Contracts\HasMediaUsageLabel;
 use App\Enums\PublishStatus;
-use App\Models\Concerns\DeletesStoredFiles;
+use App\Models\Concerns\TracksMediaUsage;
 use Database\Factories\StaticPageFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Builder;
@@ -15,10 +16,10 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Str;
 
 #[Fillable(['title', 'slug', 'featured_image', 'content', 'meta_title', 'meta_description', 'status'])]
-class StaticPage extends Model
+class StaticPage extends Model implements HasMediaUsageLabel
 {
     /** @use HasFactory<StaticPageFactory> */
-    use DeletesStoredFiles, HasFactory, SoftDeletes;
+    use HasFactory, SoftDeletes, TracksMediaUsage;
 
     /**
      * Slug tĩnh bị cấm vì trùng với các route/đường dẫn hệ thống đã biết.

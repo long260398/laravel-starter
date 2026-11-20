@@ -13,10 +13,13 @@ const themeInput = readdirSync('resources/themes', { withFileTypes: true })
         `resources/themes/${entry.name}/js/app.js`,
     ]);
 
+// Theme riêng của panel admin Filament (xem AdminPanelProvider::viteTheme()).
+const adminThemeInput = ['resources/css/filament/admin/theme.css'];
+
 export default defineConfig({
     plugins: [
         laravel({
-            input: themeInput,
+            input: [...themeInput, ...adminThemeInput],
             refresh: true,
             fonts: [
                 bunny('Instrument Sans', {

@@ -2,8 +2,10 @@
 
 namespace App\Modules\Gallery\Models;
 
-use App\Models\Concerns\DeletesStoredFiles;
+use App\Contracts\HasMediaUsageLabel;
+use App\Models\Concerns\TracksMediaUsage;
 use App\Modules\Gallery\Database\Factories\GalleryImageFactory;
+use App\Modules\Gallery\Filament\Resources\GalleryAlbums\GalleryAlbumResource;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -11,14 +13,14 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * Không dùng SoftDeletes: ảnh không cần "thùng rác" riêng (chỉ Album mới soft
- * delete). delete() ở đây đã là xóa vĩnh viễn duy nhất, nên DeletesStoredFiles
- * dọn file ngay ở event `deleted` (xem App\Models\Concerns\DeletesStoredFiles).
+ * delete). delete() ở đây đã là xóa vĩnh viễn duy nhất, nên TracksMediaUsage
+ * gỡ usage ngay ở event `deleted` (xem App\Models\Concerns\TracksMediaUsage).
  */
 #[Fillable(['gallery_album_id', 'image', 'caption', 'sort_order'])]
-class GalleryImage extends Model
+class GalleryImage extends Model implements HasMediaUsageLabel
 {
     /** @use HasFactory<GalleryImageFactory> */
-    use DeletesStoredFiles, HasFactory;
+    use HasFactory, TracksMediaUsage;
 
     /**
      * @var array<string, string>
@@ -51,5 +53,23 @@ class GalleryImage extends Model
     public function album(): BelongsTo
     {
         return $this->belongsTo(GalleryAlbum::class, 'gallery_album_id');
+    }
+
+    /**
+     * Ảnh không có trang sửa riêng (chỉ sửa qua ô "Ảnh trong album" của Album) —
+     * trỏ thẳng về trang sửa album cha thay vì dùng mặc định của trait.
+     */
+    public function mediaUsageLabel(): string
+    {
+        return 'Ảnh trong album: '.($this->album?->title ?? '#'.$this->gallery_album_id);
+    }
+
+    public function mediaUsageUrl(): ?string
+    {
+        if ($this->gallery_album_id === null) {
+            return null;
+        }
+
+        return GalleryAlbumResource::getUrl('edit', ['record' => $this->gallery_album_id]);
     }
 }

@@ -31,7 +31,7 @@ class GalleryServiceProvider extends ServiceProvider
         $registry->registerNavItem('gallery::nav-item');
 
         $registry->registerHomeSection('gallery::home-section', fn (): array => [
-            'albums' => GalleryAlbum::query()->published()->orderBy('sort_order')->take(6)->get(),
+            'albums' => GalleryAlbum::query()->published()->orderBy('sort_order')->with('images')->take(6)->get(),
         ]);
 
         $registry->registerSitemapUrls(fn () => GalleryAlbum::query()->published()->get()->map(

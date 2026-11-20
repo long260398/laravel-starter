@@ -1,7 +1,7 @@
 <article class="flex flex-col overflow-hidden rounded-lg border border-brand-100 bg-surface">
     <a href="{{ route('gallery.show', $album->slug) }}" class="block">
-        @if ($album->cover_image)
-            <img src="{{ public_file_url($album->cover_image) }}" alt="{{ $album->title }}" class="h-48 w-full object-cover" loading="lazy">
+        @if ($album->cover_url)
+            <img src="{{ $album->cover_url }}" alt="{{ $album->title }}" class="h-48 w-full object-cover" loading="lazy">
         @endif
 
         <div class="p-4">

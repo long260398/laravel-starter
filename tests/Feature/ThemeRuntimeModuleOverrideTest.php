@@ -53,6 +53,20 @@ class ThemeRuntimeModuleOverrideTest extends TestCase
         $this->get('/')->assertSee('data-theme-view="spa-natural:gallery.home-section"', false);
     }
 
+    public function test_gallery_index_page_renders_under_spa_natural_theme(): void
+    {
+        $album = GalleryAlbum::factory()->published()->create();
+
+        $this->get('/gallery')->assertOk()->assertSee($album->title);
+    }
+
+    public function test_gallery_show_page_renders_under_spa_natural_theme(): void
+    {
+        $album = GalleryAlbum::factory()->published()->create();
+
+        $this->get("/gallery/{$album->slug}")->assertOk()->assertSee($album->title);
+    }
+
     public function test_home_page_renders_theme_override_for_testimonials_home_section(): void
     {
         Testimonial::factory()->published()->create();

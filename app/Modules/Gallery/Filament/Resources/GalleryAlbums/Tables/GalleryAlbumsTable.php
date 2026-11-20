@@ -16,18 +16,19 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 class GalleryAlbumsTable
 {
     public static function configure(Table $table): Table
     {
         return $table
+            ->modifyQueryUsing(fn (Builder $query): Builder => $query->with('images'))
             ->reorderable('sort_order')
             ->defaultSort('sort_order')
             ->columns([
-                ImageColumn::make('cover_image')
-                    ->label('Ảnh đại diện')
-                    ->disk('public'),
+                ImageColumn::make('cover_url')
+                    ->label('Ảnh đại diện'),
                 TextColumn::make('title')
                     ->label('Tên album')
                     ->searchable()

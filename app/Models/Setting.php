@@ -2,22 +2,27 @@
 
 namespace App\Models;
 
+use App\Actions\RegisterMediaUsage;
+use App\Actions\ReleaseMediaUsage;
+use App\Contracts\HasMediaUsageLabel;
+use App\Filament\Pages\Settings as SettingsPage;
 use Database\Factories\SettingFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Storage;
 
 /**
  * Lưu cấu hình website dạng key–value. `value` được JSON-encode nên có thể
  * chứa chuỗi, số, boolean hoặc mảng.
  *
- * Các key trong `$fileKeys` được coi là đường dẫn file trên disk `public`:
- * khi giá trị của key đó thay đổi, file cũ sẽ bị xóa sau khi DB ghi thành công.
+ * Các key trong `$fileKeys` được coi là đường dẫn file trên disk
+ * `config('media.disk')`: khi giá trị của key đó thay đổi, usage trong kho
+ * media được cập nhật tương ứng (xem App\Models\Concerns\TracksMediaUsage) —
+ * file không bị xóa ở đây nữa, chỉ xóa từ trang Thư viện media khi hết usage.
  */
 #[Fillable(['key', 'value'])]
-class Setting extends Model
+class Setting extends Model implements HasMediaUsageLabel
 {
     /** @use HasFactory<SettingFactory> */
     use HasFactory;
@@ -72,16 +77,28 @@ class Setting extends Model
     {
         $oldValue = static::query()->where('key', $key)->first()?->value;
 
-        static::query()->updateOrCreate(['key' => $key], ['value' => $value]);
+        $setting = static::query()->updateOrCreate(['key' => $key], ['value' => $value]);
 
         if (! in_array($key, static::$fileKeys, true)) {
             return;
         }
 
-        if (blank($oldValue) || $oldValue === $value) {
-            return;
+        if (filled($value)) {
+            app(RegisterMediaUsage::class)->handle(config('media.disk'), $value, $setting, $key);
         }
 
-        Storage::disk('public')->delete($oldValue);
+        if (filled($oldValue) && $oldValue !== $value) {
+            app(ReleaseMediaUsage::class)->handle(config('media.disk'), $oldValue, $setting, $key);
+        }
+    }
+
+    public function mediaUsageLabel(): string
+    {
+        return 'Cài đặt → '.$this->key;
+    }
+
+    public function mediaUsageUrl(): ?string
+    {
+        return SettingsPage::getUrl();
     }
 }

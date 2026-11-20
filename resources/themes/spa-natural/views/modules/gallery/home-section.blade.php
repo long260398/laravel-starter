@@ -10,9 +10,9 @@
 
         <div class="mt-8 grid gap-4 md:grid-cols-[1.4fr_1fr]">
             <a href="{{ route('gallery.show', $bigAlbum->slug) }}" class="block">
-                @if ($bigAlbum->cover_image)
+                @if ($bigAlbum->cover_url)
                     <img
-                        src="{{ public_file_url($bigAlbum->cover_image) }}"
+                        src="{{ $bigAlbum->cover_url }}"
                         alt="{{ $bigAlbum->title }}"
                         class="h-full max-h-[32rem] w-full rounded-3xl object-cover"
                     >
@@ -26,9 +26,9 @@
             <div class="flex flex-col gap-4">
                 @foreach ($smallAlbums as $album)
                     <a href="{{ route('gallery.show', $album->slug) }}" class="block flex-1">
-                        @if ($album->cover_image)
+                        @if ($album->cover_url)
                             <img
-                                src="{{ public_file_url($album->cover_image) }}"
+                                src="{{ $album->cover_url }}"
                                 alt="{{ $album->title }}"
                                 class="h-full min-h-[9rem] w-full rounded-3xl object-cover"
                             >

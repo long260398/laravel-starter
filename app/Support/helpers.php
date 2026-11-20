@@ -14,15 +14,16 @@ if (! function_exists('setting')) {
 
 if (! function_exists('public_file_url')) {
     /**
-     * URL công khai của một file lưu trên disk `public` (logo, ảnh banner, ảnh bài viết...).
+     * URL công khai của một file lưu trên disk (logo, ảnh banner, ảnh bài viết...).
+     * Không truyền `$disk` → dùng `config('media.disk')`.
      */
-    function public_file_url(?string $path): ?string
+    function public_file_url(?string $path, ?string $disk = null): ?string
     {
         if (blank($path)) {
             return null;
         }
 
-        return Storage::disk('public')->url($path);
+        return Storage::disk($disk ?? config('media.disk'))->url($path);
     }
 }
 

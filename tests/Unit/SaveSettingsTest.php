@@ -3,6 +3,7 @@
 namespace Tests\Unit;
 
 use App\Actions\SaveSettings;
+use App\Models\Media;
 use App\Models\Setting;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
@@ -25,10 +26,10 @@ class SaveSettingsTest extends TestCase
         $this->assertSame('0909123456', Setting::get('hotline'));
     }
 
-    public function test_handle_deletes_the_old_file_only_after_a_successful_save(): void
+    public function test_handle_keeps_the_old_file_but_moves_its_usage_to_unused(): void
     {
-        Storage::fake('public');
-        Storage::disk('public')->put('settings/old-logo.png', 'old');
+        Storage::fake(config('media.disk'));
+        Storage::disk(config('media.disk'))->put('settings/old-logo.png', 'old');
         Setting::set('logo', 'settings/old-logo.png');
 
         app(SaveSettings::class)->handle([
@@ -36,13 +37,15 @@ class SaveSettingsTest extends TestCase
         ]);
 
         $this->assertSame('settings/new-logo.png', Setting::get('logo'));
-        Storage::disk('public')->assertMissing('settings/old-logo.png');
+        Storage::disk(config('media.disk'))->assertExists('settings/old-logo.png');
+        $this->assertFalse(Media::query()->where('path', 'settings/old-logo.png')->first()->isUsed());
+        $this->assertTrue(Media::query()->where('path', 'settings/new-logo.png')->first()->isUsed());
     }
 
-    public function test_handle_keeps_the_old_file_and_rolls_back_the_database_on_mid_transaction_failure(): void
+    public function test_handle_rolls_back_usage_changes_on_mid_transaction_failure(): void
     {
-        Storage::fake('public');
-        Storage::disk('public')->put('settings/old-logo.png', 'old');
+        Storage::fake(config('media.disk'));
+        Storage::disk(config('media.disk'))->put('settings/old-logo.png', 'old');
         Setting::set('logo', 'settings/old-logo.png');
 
         $hasThrown = false;
@@ -66,20 +69,22 @@ class SaveSettingsTest extends TestCase
         }
 
         $this->assertSame('settings/old-logo.png', Setting::get('logo'));
-        Storage::disk('public')->assertExists('settings/old-logo.png');
+        Storage::disk(config('media.disk'))->assertExists('settings/old-logo.png');
+        $this->assertTrue(Media::query()->where('path', 'settings/old-logo.png')->first()->isUsed());
         $this->assertDatabaseMissing('settings', ['key' => 'boom']);
     }
 
-    public function test_handle_does_not_queue_a_file_for_deletion_when_the_value_is_unchanged(): void
+    public function test_handle_does_not_change_usage_when_the_value_is_unchanged(): void
     {
-        Storage::fake('public');
-        Storage::disk('public')->put('settings/logo.png', 'content');
+        Storage::fake(config('media.disk'));
+        Storage::disk(config('media.disk'))->put('settings/logo.png', 'content');
         Setting::set('logo', 'settings/logo.png');
 
         app(SaveSettings::class)->handle([
             'logo' => 'settings/logo.png',
         ]);
 
-        Storage::disk('public')->assertExists('settings/logo.png');
+        Storage::disk(config('media.disk'))->assertExists('settings/logo.png');
+        $this->assertTrue(Media::query()->where('path', 'settings/logo.png')->first()->isUsed());
     }
 }

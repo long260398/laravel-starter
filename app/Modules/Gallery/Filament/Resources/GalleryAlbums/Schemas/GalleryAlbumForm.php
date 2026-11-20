@@ -34,18 +34,25 @@ class GalleryAlbumForm
                     ->label('Mô tả')
                     ->maxLength(1000)
                     ->columnSpanFull(),
-                FileUpload::make('cover_image')
-                    ->label('Ảnh đại diện')
-                    ->image()
-                    ->disk('public')
-                    ->directory('gallery/covers')
-                    ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
-                    ->maxSize(2048),
                 Select::make('status')
                     ->label('Trạng thái')
                     ->options(PublishStatus::class)
                     ->required()
                     ->native(false),
+                FileUpload::make('images')
+                    ->label('Ảnh trong album')
+                    ->helperText('Ảnh đầu tiên sẽ là ảnh bìa — kéo thả để đổi thứ tự.')
+                    ->multiple()
+                    ->reorderable()
+                    ->appendFiles()
+                    ->panelLayout('grid')
+                    ->image()
+                    ->disk(config('media.disk'))
+                    ->directory('gallery/images')
+                    ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
+                    ->maxSize(2048)
+                    ->maxFiles(60)
+                    ->columnSpanFull(),
             ]);
     }
 }

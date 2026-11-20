@@ -2,8 +2,9 @@
 
 namespace App\Models;
 
+use App\Contracts\HasMediaUsageLabel;
 use App\Enums\PublishStatus;
-use App\Models\Concerns\DeletesStoredFiles;
+use App\Models\Concerns\TracksMediaUsage;
 use Database\Factories\BannerFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Builder;
@@ -19,10 +20,10 @@ use Illuminate\Database\Eloquent\SoftDeletes;
     'title', 'subtitle', 'image', 'image_mobile', 'link_url', 'open_in_new_tab',
     'button_text', 'position', 'starts_at', 'ends_at', 'status',
 ])]
-class Banner extends Model
+class Banner extends Model implements HasMediaUsageLabel
 {
     /** @use HasFactory<BannerFactory> */
-    use DeletesStoredFiles, HasFactory, SoftDeletes;
+    use HasFactory, SoftDeletes, TracksMediaUsage;
 
     /**
      * @var array<string, string>

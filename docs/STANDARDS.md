@@ -67,6 +67,13 @@ Frontend tách khỏi controller qua hệ thống theme — đổi giao diện c
 - **Asset**: mỗi theme có entry Vite riêng (`css/app.css`, `js/app.js`), `vite.config.js` tự quét `resources/themes/*` — thêm theme mới không cần sửa `vite.config.js`. CSS theme phải `@source` cả view của chính nó, view của theme `default` (vì fallback) và view của module (`app/Modules/*/resources/views`) để Tailwind quét đủ class dùng trong các view fallback.
 - **Test**: thêm theme mới không cần sửa test core; `ThemeContractTest` tự quét mọi theme trong `resources/themes/`, render từng view hợp đồng mà theme đó có bằng dữ liệu mẫu đúng `docs/THEME-CONTRACT.md` — view dùng biến ngoài hợp đồng sẽ fail rõ theme/view nào.
 
+## Lưu trữ file
+- Không ghi cứng disk `'public'` trong code mới; dùng `config('media.disk')`. Mục tiêu: đổi nơi lưu (R2, S3, FTP, hệ thống của khách qua adapter riêng) chỉ bằng `.env`.
+- Database chỉ lưu đường dẫn tương đối của file, không lưu URL đầy đủ.
+- URL file luôn sinh qua helper `public_file_url()`, không tự ghép chuỗi URL trong view hay controller.
+- Chỉ áp dụng cho code mới. Không refactor các chỗ cũ đang ghi cứng `'public'` — để task riêng sau.
+- Mọi file upload đều được ghi vào thư viện media qua `TracksMediaUsage`; file chỉ bị xóa từ Thư viện media khi không còn được dùng. Model mới có upload phải dùng trait này.
+
 ## Giao diện
 - Admin dùng tiếng Việt (APP_LOCALE=vi); label, thông báo, tên menu viết tiếng Việt.
 - Mọi Filament resource (core và module) phải đặt `protected static bool $hasTitleCaseModelLabel = false;` — Filament mặc định viết hoa từng chữ (`Str::ucwords()`) label cho breadcrumb/modal, làm sai label tiếng Việt (ví dụ "Bài Viết" thay vì "Bài viết").
@@ -75,6 +82,9 @@ Frontend tách khỏi controller qua hệ thống theme — đổi giao diện c
 ## Routing / URL
 - Route cố định do hệ thống định nghĩa (không phải slug nội dung do người dùng nhập) dùng tiếng Anh: `/blog`, `/contact`, `/sitemap.xml`, `/robots.txt`...
 - Ngoại lệ: slug của nội dung do editor/khách tạo — bài viết (Post), trang tĩnh (StaticPage), sản phẩm (Product, sau này) — giữ tự do theo tiêu đề gốc (có thể tiếng Việt có dấu/không dấu), không ép tiếng Anh.
+
+## Deploy
+- Sau mỗi lần deploy: chạy `npm run build` (biên dịch lại theme frontend + theme panel admin Filament) rồi `php artisan filament:upgrade` (đồng bộ asset Filament khớp bản package vừa cài — thiếu bước này thì CSS/JS admin có thể bị cũ, lệch với markup). `filament:upgrade` đã tự chạy trong `composer.json` (`post-autoload-dump`) mỗi lần `composer install`/`update`, nhưng vẫn phải chạy `npm run build` thủ công vì đó là lệnh Node, composer không gọi được.
 
 ## Kiến trúc & API
 - Logic nghiệp vụ đặt trong Actions (`app/Actions`, module thì `app/Modules/{Tên}/Actions`): mỗi action 1 class, 1 method `handle()`. Controller, Filament và API (sau này) chỉ gọi lại, không viết logic trùng.

@@ -2,8 +2,9 @@
 
 namespace App\Models;
 
+use App\Contracts\HasMediaUsageLabel;
 use App\Enums\PublishStatus;
-use App\Models\Concerns\DeletesStoredFiles;
+use App\Models\Concerns\TracksMediaUsage;
 use Database\Factories\PostFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Builder;
@@ -13,10 +14,10 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 #[Fillable(['title', 'slug', 'featured_image', 'content', 'status', 'published_at'])]
-class Post extends Model
+class Post extends Model implements HasMediaUsageLabel
 {
     /** @use HasFactory<PostFactory> */
-    use DeletesStoredFiles, HasFactory, SoftDeletes;
+    use HasFactory, SoftDeletes, TracksMediaUsage;
 
     /**
      * @var array<string, string>

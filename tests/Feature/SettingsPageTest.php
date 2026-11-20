@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Filament\Pages\Settings;
+use App\Models\Media;
 use App\Models\Setting;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -134,17 +135,19 @@ class SettingsPageTest extends TestCase
         $this->assertSame('Spa XYZ', setting('site_name'));
     }
 
-    public function test_replacing_the_logo_deletes_the_old_file(): void
+    public function test_replacing_the_logo_keeps_the_old_file_but_moves_its_usage_to_unused(): void
     {
-        Storage::fake('public');
+        Storage::fake(config('media.disk'));
 
-        $oldPath = UploadedFile::fake()->image('old.png')->store('settings', 'public');
+        $oldPath = UploadedFile::fake()->image('old.png')->store('settings', config('media.disk'));
         Setting::set('logo', $oldPath);
 
-        $newPath = UploadedFile::fake()->image('new.png')->store('settings', 'public');
+        $newPath = UploadedFile::fake()->image('new.png')->store('settings', config('media.disk'));
         Setting::set('logo', $newPath);
 
-        Storage::disk('public')->assertMissing($oldPath);
-        Storage::disk('public')->assertExists($newPath);
+        Storage::disk(config('media.disk'))->assertExists($oldPath);
+        Storage::disk(config('media.disk'))->assertExists($newPath);
+        $this->assertFalse(Media::query()->where('path', $oldPath)->first()->isUsed());
+        $this->assertTrue(Media::query()->where('path', $newPath)->first()->isUsed());
     }
 }

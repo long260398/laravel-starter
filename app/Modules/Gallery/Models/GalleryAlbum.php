@@ -2,21 +2,23 @@
 
 namespace App\Modules\Gallery\Models;
 
+use App\Contracts\HasMediaUsageLabel;
 use App\Enums\PublishStatus;
-use App\Models\Concerns\DeletesStoredFiles;
+use App\Models\Concerns\TracksMediaUsage;
 use App\Modules\Gallery\Database\Factories\GalleryAlbumFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 #[Fillable(['title', 'slug', 'description', 'cover_image', 'status', 'sort_order'])]
-class GalleryAlbum extends Model
+class GalleryAlbum extends Model implements HasMediaUsageLabel
 {
     /** @use HasFactory<GalleryAlbumFactory> */
-    use DeletesStoredFiles, HasFactory, SoftDeletes;
+    use HasFactory, SoftDeletes, TracksMediaUsage;
 
     /**
      * @var array<string, string>
@@ -66,6 +68,17 @@ class GalleryAlbum extends Model
     public function images(): HasMany
     {
         return $this->hasMany(GalleryImage::class)->orderBy('sort_order');
+    }
+
+    /**
+     * Ảnh bìa: ảnh đầu tiên theo sort_order; `cover_image` chỉ còn dùng để
+     * fallback cho album tạo trước khi form bỏ ô chọn ảnh bìa riêng.
+     */
+    protected function coverUrl(): Attribute
+    {
+        return Attribute::get(
+            fn (): ?string => public_file_url($this->images->first()?->image ?? $this->cover_image)
+        );
     }
 
     /**

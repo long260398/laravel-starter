@@ -4,7 +4,7 @@
     @php
         $seoTitle = $album->title.' - '.setting('site_name');
         $seoDescription = $album->description ? str($album->description)->squish()->limit(160) : null;
-        $ogImageUrl = public_file_url($album->cover_image);
+        $ogImageUrl = $album->cover_url;
     @endphp
 
     <article class="mx-auto max-w-6xl px-4 py-10">
@@ -27,7 +27,7 @@
                     >
                         <img
                             src="{{ public_file_url($image->image) }}"
-                            alt="{{ $image->caption ?: $album->title }}"
+                            alt="{{ $image->caption ?? $album->title.' – ảnh '.$loop->iteration }}"
                             class="h-48 w-full object-cover"
                             loading="lazy"
                         >

@@ -10,7 +10,7 @@ class GalleryController extends Controller
 {
     public function index(): View
     {
-        $albums = GalleryAlbum::query()->published()->orderBy('sort_order')->get();
+        $albums = GalleryAlbum::query()->published()->orderBy('sort_order')->with('images')->get();
 
         return view('gallery::index', [
             'albums' => $albums,

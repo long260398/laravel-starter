@@ -42,15 +42,12 @@ class GalleryAlbumResourceTest extends TestCase
 
     public function test_can_create_gallery_album_with_slug_generated_from_title(): void
     {
-        Storage::fake('public');
-
         $this->actingAs(User::factory()->create());
 
         Livewire::test(CreateGalleryAlbum::class)
             ->fillForm([
                 'title' => 'Chuyến đi biển',
                 'status' => PublishStatus::Draft,
-                'cover_image' => UploadedFile::fake()->image('cover.jpg'),
             ])
             ->call('create')
             ->assertHasNoFormErrors();
@@ -59,7 +56,86 @@ class GalleryAlbumResourceTest extends TestCase
 
         $this->assertNotNull($album);
         $this->assertSame(Str::slug('Chuyến đi biển'), $album->slug);
-        $this->assertTrue(Storage::disk('public')->exists($album->cover_image));
+    }
+
+    public function test_can_create_gallery_album_with_images_in_submitted_order(): void
+    {
+        Storage::fake(config('media.disk'));
+
+        $this->actingAs(User::factory()->create());
+
+        Livewire::test(CreateGalleryAlbum::class)
+            ->fillForm([
+                'title' => 'Album có ảnh',
+                'status' => PublishStatus::Draft,
+                'images' => [
+                    UploadedFile::fake()->image('a.jpg'),
+                    UploadedFile::fake()->image('b.jpg'),
+                    UploadedFile::fake()->image('c.jpg'),
+                ],
+            ])
+            ->call('create')
+            ->assertHasNoFormErrors();
+
+        $album = GalleryAlbum::query()->where('title', 'Album có ảnh')->first();
+
+        $this->assertNotNull($album);
+        $this->assertSame(3, $album->images()->count());
+        $this->assertSame([1, 2, 3], $album->images()->orderBy('sort_order')->pluck('sort_order')->all());
+    }
+
+    public function test_album_images_field_rejects_more_than_sixty_files(): void
+    {
+        Storage::fake(config('media.disk'));
+
+        $this->actingAs(User::factory()->create());
+
+        $files = [];
+
+        for ($i = 0; $i < 61; $i++) {
+            $files[] = UploadedFile::fake()->image("photo-{$i}.jpg");
+        }
+
+        Livewire::test(CreateGalleryAlbum::class)
+            ->fillForm([
+                'title' => 'Album quá nhiều ảnh',
+                'status' => PublishStatus::Draft,
+                'images' => $files,
+            ])
+            ->call('create')
+            ->assertHasFormErrors(['images']);
+    }
+
+    public function test_album_images_field_rejects_file_larger_than_2mb(): void
+    {
+        Storage::fake(config('media.disk'));
+
+        $this->actingAs(User::factory()->create());
+
+        Livewire::test(CreateGalleryAlbum::class)
+            ->fillForm([
+                'title' => 'Album ảnh quá nặng',
+                'status' => PublishStatus::Draft,
+                'images' => [UploadedFile::fake()->image('too-big.jpg')->size(3000)],
+            ])
+            ->call('create')
+            ->assertHasFormErrors(['images']);
+    }
+
+    public function test_album_images_field_rejects_non_image_mime_type(): void
+    {
+        Storage::fake(config('media.disk'));
+
+        $this->actingAs(User::factory()->create());
+
+        Livewire::test(CreateGalleryAlbum::class)
+            ->fillForm([
+                'title' => 'Album file lạ',
+                'status' => PublishStatus::Draft,
+                'images' => [UploadedFile::fake()->create('document.pdf', 10, 'application/pdf')],
+            ])
+            ->call('create')
+            ->assertHasFormErrors(['images']);
     }
 
     public function test_can_update_gallery_album(): void

@@ -2,8 +2,9 @@
 
 namespace App\Modules\Testimonials\Models;
 
+use App\Contracts\HasMediaUsageLabel;
 use App\Enums\PublishStatus;
-use App\Models\Concerns\DeletesStoredFiles;
+use App\Models\Concerns\TracksMediaUsage;
 use App\Modules\Testimonials\Database\Factories\TestimonialFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Builder;
@@ -14,10 +15,10 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 #[Fillable([
     'customer_name', 'customer_title', 'avatar', 'content', 'rating', 'status', 'sort_order',
 ])]
-class Testimonial extends Model
+class Testimonial extends Model implements HasMediaUsageLabel
 {
     /** @use HasFactory<TestimonialFactory> */
-    use DeletesStoredFiles, HasFactory, SoftDeletes;
+    use HasFactory, SoftDeletes, TracksMediaUsage;
 
     /**
      * @var array<string, string>

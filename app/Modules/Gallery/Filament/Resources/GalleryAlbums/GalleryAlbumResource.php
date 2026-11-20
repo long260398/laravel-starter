@@ -6,7 +6,6 @@ use App\Enums\NavigationGroup;
 use App\Modules\Gallery\Filament\Resources\GalleryAlbums\Pages\CreateGalleryAlbum;
 use App\Modules\Gallery\Filament\Resources\GalleryAlbums\Pages\EditGalleryAlbum;
 use App\Modules\Gallery\Filament\Resources\GalleryAlbums\Pages\ListGalleryAlbums;
-use App\Modules\Gallery\Filament\Resources\GalleryAlbums\RelationManagers\ImagesRelationManager;
 use App\Modules\Gallery\Filament\Resources\GalleryAlbums\Schemas\GalleryAlbumForm;
 use App\Modules\Gallery\Filament\Resources\GalleryAlbums\Tables\GalleryAlbumsTable;
 use App\Modules\Gallery\Models\GalleryAlbum;
@@ -54,13 +53,6 @@ class GalleryAlbumResource extends Resource
     public static function table(Table $table): Table
     {
         return GalleryAlbumsTable::configure($table);
-    }
-
-    public static function getRelations(): array
-    {
-        return [
-            ImagesRelationManager::class,
-        ];
     }
 
     public static function getPages(): array

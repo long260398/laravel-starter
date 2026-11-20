@@ -1,0 +1,33 @@
+@import '../../../../vendor/filament/filament/resources/css/theme.css';
+
+@source '../../../../app/Filament/**/*';
+@source '../../../../resources/views/filament/**/*';
+
+/*
+ * Resource/Page Filament của module (app/Modules/{Tên}/Filament/...) và view
+ * blade riêng của module dùng trong panel admin — dùng glob `*` nên module
+ * mới không cần sửa file này (xem docs/STANDARDS.md mục "Module tùy chọn").
+ */
+@source '../../../../app/Modules/*/Filament/**/*';
+@source '../../../../app/Modules/*/resources/views/**/*';
+
+/*
+ * Lưới dạng thẻ (contentGrid) — ví dụ Thư viện media: đè checkbox chọn hàng
+ * loạt nhỏ lên góc trên-trái ảnh thay vì để nó chiếm thêm chỗ trong hàng,
+ * giống kiểu thư viện media của WordPress. Scope theo `.fi-ta-content-grid`
+ * nên chỉ ảnh hưởng bảng nào tự bật contentGrid().
+ */
+.fi-ta-content-grid .fi-ta-record {
+    position: relative;
+}
+
+.fi-ta-content-grid .fi-ta-record > .fi-ta-record-checkbox {
+    position: absolute;
+    inset-inline-start: 0.5rem;
+    top: 0.5rem;
+    z-index: 10;
+}
+
+.fi-ta-content-grid .fi-ta-record.fi-ta-record-with-content-prefix .fi-ta-record-content {
+    padding-inline-start: 0;
+}
