@@ -3,6 +3,8 @@
 namespace Tests\Feature;
 
 use App\Models\Media;
+use App\Models\Setting;
+use App\Modules\Gallery\Actions\SyncGalleryAlbumImages;
 use App\Modules\Gallery\Models\GalleryAlbum;
 use App\Modules\Gallery\Models\GalleryImage;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -91,6 +93,32 @@ class GalleryMediaUsageTest extends TestCase
         $this->assertFalse(Media::query()->where('path', $path)->first()->isUsed());
         Storage::disk(config('media.disk'))->assertExists($path);
         $this->assertDatabaseMissing('gallery_images', ['id' => $image->id]);
+    }
+
+    /**
+     * Giai đoạn 3: 1 ảnh có thể được dùng ở nhiều nơi khác nhau qua MediaPicker
+     * (vd vừa là logo vừa nằm trong 1 album) — mỗi nơi 1 usage riêng, gỡ khỏi
+     * 1 nơi không ảnh hưởng usage ở nơi còn lại, file không bị xóa.
+     */
+    public function test_an_image_shared_between_the_logo_and_an_album_keeps_the_logo_usage_after_removal_from_the_album(): void
+    {
+        Storage::fake(config('media.disk'));
+
+        $path = UploadedFile::fake()->image('shared.jpg')->store('gallery/images', config('media.disk'));
+        Setting::set('logo', $path);
+
+        $album = GalleryAlbum::factory()->create();
+        app(SyncGalleryAlbumImages::class)->handle($album, [$path]);
+
+        $media = Media::query()->where('path', $path)->first();
+        $this->assertSame(2, $media->usages()->count());
+
+        app(SyncGalleryAlbumImages::class)->handle($album, []);
+
+        $this->assertSame(0, $album->images()->count());
+        $this->assertTrue($media->refresh()->isUsed());
+        $this->assertSame($path, Setting::get('logo'));
+        Storage::disk(config('media.disk'))->assertExists($path);
     }
 
     public function test_updating_an_image_file_moves_the_old_file_usage_to_unused(): void

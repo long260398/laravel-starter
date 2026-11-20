@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\Media;
 use App\Modules\Gallery\Actions\SyncGalleryAlbumImages;
 use App\Modules\Gallery\Exceptions\InvalidGalleryImagePath;
 use App\Modules\Gallery\Models\GalleryAlbum;
@@ -81,7 +82,7 @@ class GallerySyncAlbumImagesTest extends TestCase
         $this->assertSame([$existing, $new], $album->images()->orderBy('sort_order')->pluck('image')->all());
     }
 
-    public function test_rejects_a_path_outside_the_gallery_images_directory_and_touches_nothing(): void
+    public function test_rejects_an_untracked_path_outside_the_gallery_images_directory(): void
     {
         Storage::fake(config('media.disk'));
 
@@ -99,6 +100,31 @@ class GallerySyncAlbumImagesTest extends TestCase
         }
     }
 
+    /**
+     * Giai đoạn 3: bỏ rule "chỉ nằm trong gallery/images/" — ảnh đã có sẵn
+     * trong kho media (chọn từ MediaPicker, bất kỳ thư mục nào) phải được
+     * chấp nhận, không chỉ ảnh mới upload qua đúng ô này.
+     */
+    public function test_accepts_an_existing_media_path_from_another_directory(): void
+    {
+        Storage::fake(config('media.disk'));
+
+        $postImage = UploadedFile::fake()->image('cover.jpg')->store('posts', config('media.disk'));
+        Media::factory()->create([
+            'disk' => config('media.disk'),
+            'path' => $postImage,
+            'mime_type' => 'image/jpeg',
+        ]);
+        $filesBefore = count(Storage::disk(config('media.disk'))->allFiles());
+
+        $album = GalleryAlbum::factory()->create();
+
+        app(SyncGalleryAlbumImages::class)->handle($album, [$postImage]);
+
+        $this->assertSame([$postImage], $album->images()->pluck('image')->all());
+        $this->assertSame($filesBefore, count(Storage::disk(config('media.disk'))->allFiles()));
+    }
+
     public function test_rejects_a_path_traversal_attempt(): void
     {
         Storage::fake(config('media.disk'));
@@ -114,7 +140,14 @@ class GallerySyncAlbumImagesTest extends TestCase
         }
     }
 
-    public function test_failed_sync_cleans_up_only_the_freshly_uploaded_files(): void
+    /**
+     * Đăng ký media của ảnh mới chạy TRƯỚC transaction gắn ảnh vào album (xem
+     * docblock của Action) — nên khi bước gắn vào album lỗi giữa chừng, ảnh
+     * mới KHÔNG được mất dấu: file vẫn còn trên disk VÀ có dòng `media` (hiện
+     * "chưa dùng" vì GalleryImage của nó bị rollback) — không bao giờ được
+     * phép ở trạng thái "còn trên disk nhưng không có trong media".
+     */
+    public function test_failed_sync_keeps_newly_uploaded_files_tracked_as_unused_media(): void
     {
         Storage::fake(config('media.disk'));
 
@@ -143,7 +176,13 @@ class GallerySyncAlbumImagesTest extends TestCase
 
         $this->assertSame(1, $album->images()->count());
         Storage::disk(config('media.disk'))->assertExists($existing);
-        Storage::disk(config('media.disk'))->assertMissing($fresh);
-        Storage::disk(config('media.disk'))->assertMissing($failing);
+        Storage::disk(config('media.disk'))->assertExists($fresh);
+        Storage::disk(config('media.disk'))->assertExists($failing);
+
+        foreach ([$fresh, $failing] as $path) {
+            $media = Media::query()->where('path', $path)->first();
+            $this->assertNotNull($media, "Thiếu dòng media cho {$path} — file tồn tại trên disk mà không có trong media.");
+            $this->assertFalse($media->isUsed());
+        }
     }
 }

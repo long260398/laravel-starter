@@ -3,7 +3,7 @@
 namespace App\Modules\Gallery\Filament\Resources\GalleryAlbums\Schemas;
 
 use App\Enums\PublishStatus;
-use Filament\Forms\Components\FileUpload;
+use App\Filament\Forms\Components\MediaPicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -39,7 +39,7 @@ class GalleryAlbumForm
                     ->options(PublishStatus::class)
                     ->required()
                     ->native(false),
-                FileUpload::make('images')
+                MediaPicker::make('images', multipleActionLabel: 'Thêm vào album')
                     ->label('Ảnh trong album')
                     ->helperText('Ảnh đầu tiên sẽ là ảnh bìa — kéo thả để đổi thứ tự.')
                     ->multiple()

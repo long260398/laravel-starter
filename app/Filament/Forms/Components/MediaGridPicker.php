@@ -30,11 +30,25 @@ class MediaGridPicker extends Field
 
     protected int $perPage = 12;
 
+    protected bool $isMultiple = false;
+
     public function disk(string|Closure $disk): static
     {
         $this->disk = $disk;
 
         return $this;
+    }
+
+    public function multiple(bool $condition = true): static
+    {
+        $this->isMultiple = $condition;
+
+        return $this;
+    }
+
+    public function isMultiple(): bool
+    {
+        return $this->isMultiple;
     }
 
     /**
