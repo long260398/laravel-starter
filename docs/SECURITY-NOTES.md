@@ -34,3 +34,17 @@ mới, hoặc advisory cũ nay đã có fix) → cập nhật hoặc xoá mục.
 - **Khi nào xem lại**: picomatch phát hành bản vá (theo dõi
   https://github.com/micromatch/picomatch/issues/247), hoặc `laravel-vite-plugin`
   đổi sang dependency khác.
+
+## Hallmark — tham số đường dẫn không kiểm tra phạm vi
+
+- **Vấn đề**: các script của skill Hallmark (`theme.mjs`, `capture.mjs`,
+  `sloplint.mjs`...) nhận `--dir`/`--out`/`--log`/`--save` và ghi/đọc file
+  trực tiếp theo giá trị truyền vào, không kiểm tra path nằm trong project
+  (không chặn đường dẫn tuyệt đối hay `..`).
+- **Biện pháp giảm thiểu**: quy tắc bắt buộc ở `CLAUDE.md` mục "Hallmark (skill
+  thiết kế)" — các tham số này chỉ dùng đường dẫn tương đối trong project,
+  không tuyệt đối, không `..`; không chạy `install-hook.mjs`/`imagegen.mjs`;
+  không dùng `--cdp`; không chụp màn hình trang `/admin`.
+- **Khi nào xem lại**: mỗi lần cập nhật skill Hallmark (xem
+  `.claude/skills/hallmark/LOCAL-CHANGES.md`), kiểm tra lại các script có
+  thêm việc validate path chưa.

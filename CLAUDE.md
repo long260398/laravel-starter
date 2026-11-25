@@ -150,3 +150,10 @@ This project has domain-specific skills available in `**/skills/**`. You MUST ac
 - Run `vendor/bin/phpunit` to call the test runner directly. It accepts the same file path and `--filter=testName` arguments.
 
 </laravel-boost-guidelines>
+
+## Hallmark (skill thiết kế)
+
+- `theme.mjs scaffold` LUÔN truyền `--dir resources/themes/{tên-theme}/css`.
+- `--dir`/`--out`/`--log`/`--save` chỉ dùng đường dẫn tương đối trong project, không tuyệt đối, không `..`.
+- Không chạy `install-hook.mjs`, `imagegen.mjs`; không dùng `--cdp`; không chụp màn hình trang `/admin`.
+- Theme vẫn phải theo `docs/THEME-CONTRACT.md` và `docs/STANDARDS.md`.
