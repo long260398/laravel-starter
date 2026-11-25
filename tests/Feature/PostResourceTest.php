@@ -7,6 +7,8 @@ use App\Filament\Resources\Posts\Pages\CreatePost;
 use App\Filament\Resources\Posts\Pages\EditPost;
 use App\Filament\Resources\Posts\Pages\ListPosts;
 use App\Models\Post;
+use App\Models\PostCategory;
+use App\Models\Tag;
 use App\Models\User;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\ForceDeleteAction;
@@ -154,6 +156,82 @@ class PostResourceTest extends TestCase
 
         $this->assertTrue($admin->can('forceDelete', $post));
         $this->assertTrue($admin->can('forceDeleteAny', Post::class));
+    }
+
+    public function test_creating_post_with_new_tag_names_creates_and_attaches_tags(): void
+    {
+        $this->actingAs(User::factory()->create());
+        $category = PostCategory::factory()->create();
+
+        Livewire::test(CreatePost::class)
+            ->fillForm([
+                'title' => 'Bài viết có thẻ mới',
+                'slug' => 'bai-viet-co-the-moi',
+                'category_id' => $category->id,
+                'tag_names' => ['Mẹo vặt', 'Gia đình'],
+                'content' => 'Nội dung.',
+                'status' => PublishStatus::Draft,
+            ])
+            ->call('create')
+            ->assertHasNoFormErrors();
+
+        $post = Post::query()->where('slug', 'bai-viet-co-the-moi')->first();
+
+        $this->assertNotNull($post);
+        $this->assertSame($category->id, $post->category_id);
+        $this->assertSame(['Mẹo vặt', 'Gia đình'], $post->tags->pluck('name')->all());
+    }
+
+    public function test_editing_post_tags_replaces_previous_tags(): void
+    {
+        $this->actingAs(User::factory()->create());
+
+        $post = Post::factory()->create();
+        $existingTag = Tag::factory()->create(['name' => 'Cũ']);
+        $post->tags()->attach($existingTag);
+
+        Livewire::test(EditPost::class, ['record' => $post->getRouteKey()])
+            ->fillForm(['tag_names' => ['Mới']])
+            ->call('save')
+            ->assertHasNoFormErrors();
+
+        $post->refresh();
+
+        $this->assertSame(['Mới'], $post->tags->pluck('name')->all());
+    }
+
+    public function test_reusing_an_existing_tag_name_does_not_create_a_duplicate(): void
+    {
+        $this->actingAs(User::factory()->create());
+        Tag::factory()->create(['name' => 'Mẹo vặt', 'slug' => 'meo-vat']);
+
+        Livewire::test(CreatePost::class)
+            ->fillForm([
+                'title' => 'Bài viết dùng thẻ có sẵn',
+                'slug' => 'bai-viet-dung-the-co-san',
+                'tag_names' => ['Mẹo vặt'],
+                'content' => 'Nội dung.',
+                'status' => PublishStatus::Draft,
+            ])
+            ->call('create')
+            ->assertHasNoFormErrors();
+
+        $this->assertSame(1, Tag::query()->where('slug', 'meo-vat')->count());
+    }
+
+    public function test_cannot_create_post_with_reserved_slug(): void
+    {
+        $this->actingAs(User::factory()->create());
+
+        Livewire::test(CreatePost::class)
+            ->fillForm([
+                'title' => 'Bài viết trùng từ khoá hệ thống',
+                'slug' => 'search',
+                'content' => 'Nội dung.',
+                'status' => PublishStatus::Draft,
+            ])
+            ->call('create')
+            ->assertHasFormErrors(['slug']);
     }
 
     public function test_safe_content_strips_unsafe_html(): void

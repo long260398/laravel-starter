@@ -14,6 +14,7 @@
         'ogImageUrl' => $ogImageUrl ?? null,
         'ogType' => $ogType ?? null,
         'canonicalUrl' => $canonicalUrl ?? null,
+        'noindex' => $noindex ?? null,
     ])
 
     @if (setting('favicon'))

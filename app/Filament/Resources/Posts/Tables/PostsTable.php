@@ -42,6 +42,13 @@ class PostsTable
                 SelectFilter::make('status')
                     ->label('Trạng thái')
                     ->options(PublishStatus::class),
+                SelectFilter::make('category_id')
+                    ->label('Chuyên mục')
+                    ->relationship('category', 'name'),
+                SelectFilter::make('tags')
+                    ->label('Thẻ')
+                    ->relationship('tags', 'name')
+                    ->multiple(),
                 TrashedFilter::make()
                     ->label('Thùng rác'),
             ])

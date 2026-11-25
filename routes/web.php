@@ -10,6 +10,14 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
 Route::get('/blog', [PostController::class, 'index'])->name('posts.index');
+Route::get('/blog/search', [PostController::class, 'search'])
+    ->middleware('throttle:post-search')
+    ->name('posts.search');
+Route::get('/blog/category/{slug}', [PostController::class, 'category'])->name('posts.category-show');
+Route::get('/blog/tag/{slug}', [PostController::class, 'tag'])->name('posts.tag-show');
+// Phải đứng sau 3 route cụ thể phía trên — nếu không, slug bài viết trùng
+// "search"/"category"/"tag" sẽ bị route động {slug} này nuốt mất đường dẫn
+// tương ứng (xem rule not_in trên field slug của PostForm).
 Route::get('/blog/{slug}', [PostController::class, 'show'])->name('posts.show');
 
 Route::get('/contact', [ContactMessageController::class, 'create'])->name('contact.create');

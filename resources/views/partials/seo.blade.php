@@ -13,6 +13,10 @@
 
 <link rel="canonical" href="{{ $canonicalUrl }}">
 
+@if ($noindex ?? false)
+    <meta name="robots" content="noindex,follow">
+@endif
+
 <meta property="og:type" content="{{ $ogType ?? 'website' }}">
 <meta property="og:title" content="{{ $seoTitle }}">
 <meta property="og:url" content="{{ $canonicalUrl }}">

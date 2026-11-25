@@ -2,7 +2,7 @@
 
 @php
     $image = public_file_url($post->featured_image);
-    $excerpt = str($post->content)->stripTags()->squish()->limit(140);
+    $excerpt = str($post->excerpt_for_display)->limit(140);
 @endphp
 
 <article class="flex flex-col overflow-hidden rounded-3xl border border-line bg-card">

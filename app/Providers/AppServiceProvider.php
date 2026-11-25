@@ -33,6 +33,12 @@ class AppServiceProvider extends ServiceProvider
             return Limit::perMinute(10)->by($request->ip());
         });
 
+        // Chống dồn dập request vào tìm kiếm bài viết (không lưu DB nên không
+        // cần giới hạn chặt như contact, chỉ cần chặn spam cơ bản theo IP).
+        RateLimiter::for('post-search', function (Request $request): Limit {
+            return Limit::perMinute(20)->by($request->ip());
+        });
+
         // Theme không được tự query DB (xem docs/STANDARDS.md) — nav static
         // page cho layouts.header đến từ composer này, không phải view.
         View::composer('layouts.header', function (ViewInstance $view): void {

@@ -12,6 +12,12 @@ Timezone: Asia/Ho_Chi_Minh.
 - PK: `id` BIGINT tự tăng. FK: `{entity}_id`, luôn có index + foreign key constraint.
 - Tên bảng snake_case số nhiều, cột snake_case. Boolean: `is_`/`has_`.
 - Bảng nội dung dùng `softDeletes()`. Không viết migration phá dữ liệu.
+- Truy vấn thô (`whereRaw`, `LIKE ... ESCAPE`...) phải chạy được trên cả
+  SQLite và MySQL — 2 driver không xử lý giống nhau mọi thứ (ví dụ: MySQL
+  coi `\` là ký tự escape khi quote chuỗi bind, SQLite thì không; dễ chạy
+  đúng trên SQLite (dev) nhưng sai trên MySQL (prod) mà không nhận ra lúc
+  dev). Khi viết SQL thô, test thêm 1 lần trên MySQL cục bộ trước khi coi là
+  xong, không chỉ tin vào suite chạy trên SQLite.
 
 ## Cấu trúc module
 - Mỗi tính năng chung (Posts, Pages, Banners, Contacts, Settings) là một nhóm rõ ràng: model, migration, Filament resource, policy.
@@ -55,6 +61,14 @@ Tính năng riêng theo ngành (Dịch vụ, Sản phẩm...) là module độc 
 - **Slug cấm**: `StaticPage::isReservedSlug()` tự gộp `route_prefixes` từ `config('modules')` — áp dụng **cả khi module đang tắt** (để không bị đè khi bật lại sau). Thêm module mới chỉ cần khai `route_prefixes` trong config, không sửa `StaticPage.php`.
 - **Vận hành**: bật module xong phải chạy `php artisan migrate` (migration của module không tự chạy nếu module tắt lúc `migrate`). Tắt module không xóa migration/bảng/dữ liệu đã có — chỉ dừng đăng ký route/view/policy/Filament resource/registry.
 - **Test**: thêm module mới thì thêm biến `MODULE_xxx=true` vào `phpunit.xml` (mặc định bật cho cả suite, giống `MODULE_SERVICES`, `MODULE_GALLERY`). Chỉ test "module tắt" mới tự set env tắt riêng trong `setUp()`/khôi phục ở `tearDown()` (xem ví dụ `ServiceModuleDisabledTest`/`GalleryModuleDisabledTest`) — không tạo cơ chế bật module riêng cho test.
+
+## Bài viết (blog)
+- `Post` có chuyên mục (`PostCategory`, 1-nhiều, nullable) và thẻ (`Tag`,
+  nhiều-nhiều qua `post_tag`). Chuyên mục có Filament resource riêng; thẻ
+  thì **không** — thẻ chỉ được tạo/gán qua `TagsInput` ngay trên form Post
+  (`App\Actions\SyncPostTags`), chưa có trang quản lý thẻ riêng. Khi cần
+  gộp/xoá thẻ trùng, thêm 1 Filament resource cho `Tag` lúc đó, không làm
+  trước khi có nhu cầu thật (YAGNI).
 
 ## Theme frontend
 Frontend tách khỏi controller qua hệ thống theme — đổi giao diện cho một khách hàng chỉ cần đổi `APP_THEME`, không sửa controller/route. Admin (Filament) và email **không thuộc theme**.

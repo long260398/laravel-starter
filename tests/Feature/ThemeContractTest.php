@@ -4,7 +4,9 @@ namespace Tests\Feature;
 
 use App\Models\Banner;
 use App\Models\Post;
+use App\Models\PostCategory;
 use App\Models\StaticPage;
+use App\Models\Tag;
 use App\Support\Modules\ModuleRegistry;
 use App\Support\Theme\ThemeViewResolver;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -243,7 +245,10 @@ class ThemeContractTest extends TestCase
     private function coreViewSamples(): array
     {
         $staticPage = StaticPage::factory()->published()->create();
-        $post = Post::factory()->published()->create();
+        $category = PostCategory::factory()->published()->create();
+        $tag = Tag::factory()->create();
+        $post = Post::factory()->published()->for($category, 'category')->create();
+        $post->tags()->attach($tag);
         $banners = Banner::factory()->published()->forPosition('home_slider')->count(2)->create();
 
         return [
@@ -258,7 +263,28 @@ class ThemeContractTest extends TestCase
             'posts/index.blade.php' => [
                 'posts' => Post::query()->published()->paginate(12),
             ],
-            'posts/show.blade.php' => ['post' => $post],
+            'posts/show.blade.php' => [
+                'post' => $post->refresh()->load(['category', 'tags']),
+                'tocHtml' => $post->safe_content,
+                'tocItems' => [],
+                'relatedPosts' => collect(),
+                'articleJsonLd' => [],
+                'breadcrumbJsonLd' => [],
+            ],
+            'posts/category.blade.php' => [
+                'category' => $category,
+                'posts' => Post::query()->published()->where('category_id', $category->id)->paginate(12),
+            ],
+            'posts/tag.blade.php' => [
+                'tag' => $tag,
+                'posts' => Post::query()->published()->whereHas('tags', fn ($q) => $q->where('tags.id', $tag->id))->paginate(12),
+                'noindex' => false,
+            ],
+            'posts/search.blade.php' => [
+                'query' => 'test',
+                'posts' => Post::query()->published()->paginate(12),
+                'noindex' => true,
+            ],
             'static-pages/show.blade.php' => ['page' => $staticPage],
             'contact/create.blade.php' => [
                 'honeypotField' => 'website',

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Post;
+use App\Models\PostCategory;
 use App\Models\StaticPage;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Cache;
@@ -19,6 +20,12 @@ class SitemapController extends Controller
                     Post::query()->published()->get()->map(fn (Post $post): array => [
                         'loc' => route('posts.show', $post->slug),
                         'lastmod' => $post->updated_at,
+                    ]),
+                )
+                ->merge(
+                    PostCategory::query()->published()->get()->map(fn (PostCategory $category): array => [
+                        'loc' => route('posts.category-show', $category->slug),
+                        'lastmod' => $category->updated_at,
                     ]),
                 )
                 ->merge(

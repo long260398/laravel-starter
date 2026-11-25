@@ -11,9 +11,11 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-#[Fillable(['title', 'slug', 'featured_image', 'content', 'status', 'published_at'])]
+#[Fillable(['title', 'slug', 'category_id', 'featured_image', 'excerpt', 'content', 'status', 'published_at'])]
 class Post extends Model implements HasMediaUsageLabel
 {
     /** @use HasFactory<PostFactory> */
@@ -53,6 +55,46 @@ class Post extends Model implements HasMediaUsageLabel
     protected function safeContent(): Attribute
     {
         return Attribute::get(fn (): string => (string) str((string) $this->content)->sanitizeHtml());
+    }
+
+    /**
+     * Tóm tắt dùng để hiển thị (card, meta description). Ưu tiên `excerpt` do
+     * admin nhập; bài cũ chưa có excerpt tự trích từ `safe_content`.
+     */
+    protected function excerptForDisplay(): Attribute
+    {
+        return Attribute::get(fn (): string => $this->excerpt !== null && $this->excerpt !== ''
+            ? $this->excerpt
+            : (string) str($this->safe_content)->stripTags()->squish()->limit(160));
+    }
+
+    /**
+     * Thời gian đọc ước tính (phút), dựa trên số từ trong `safe_content` / 200 wpm.
+     */
+    protected function readingTimeMinutes(): Attribute
+    {
+        return Attribute::get(function (): int {
+            $plainText = trim((string) str($this->safe_content)->stripTags());
+            $wordCount = $plainText === '' ? 0 : count(preg_split('/\s+/u', $plainText));
+
+            return max(1, (int) ceil($wordCount / 200));
+        });
+    }
+
+    /**
+     * @return BelongsTo<PostCategory, $this>
+     */
+    public function category(): BelongsTo
+    {
+        return $this->belongsTo(PostCategory::class);
+    }
+
+    /**
+     * @return BelongsToMany<Tag, $this>
+     */
+    public function tags(): BelongsToMany
+    {
+        return $this->belongsToMany(Tag::class);
     }
 
     /**
