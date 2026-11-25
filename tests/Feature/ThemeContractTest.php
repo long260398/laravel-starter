@@ -115,6 +115,77 @@ class ThemeContractTest extends TestCase
         }
     }
 
+    /**
+     * `<x-module-slot name="X">` trong 1 view gốc (core hoặc module) là điểm
+     * cắm cho module khác — theme override view đó mà bỏ quên thẻ này sẽ âm
+     * thầm làm mất điểm cắm, không lỗi gì rõ ràng. Test tự so khớp tên slot
+     * giữa bản gốc và mọi bản override đang có, không hardcode tên view/slot
+     * nào (xem docs/THEME-CONTRACT.md mục "Slot mở rộng").
+     */
+    public function test_theme_view_overrides_keep_the_same_module_slots_as_the_original(): void
+    {
+        $this->addToAssertionCount(1);
+
+        foreach (array_keys($this->coreViewSamples()) as $relativePath) {
+            $originalFile = $this->themePath('default', $relativePath);
+
+            if (! is_file($originalFile)) {
+                continue;
+            }
+
+            $originalSlots = $this->extractModuleSlotNames(File::get($originalFile));
+
+            if ($originalSlots === []) {
+                continue;
+            }
+
+            foreach ($this->discoverThemes() as $theme) {
+                if ($theme === 'default') {
+                    continue;
+                }
+
+                $overrideFile = $this->themePath($theme, $relativePath);
+
+                if (! is_file($overrideFile)) {
+                    continue;
+                }
+
+                $this->assertSlotsPresent($originalSlots, File::get($overrideFile), $theme, $relativePath);
+            }
+        }
+
+        foreach ($this->moduleViewSamples() as $relativePath => [$logicalView, $data]) {
+            [$moduleKey, $restPath] = explode('/', $relativePath, 2);
+            $modulePath = config("modules.{$moduleKey}.path");
+
+            if (blank($modulePath)) {
+                continue;
+            }
+
+            $originalFile = $modulePath.'/resources/views/'.$restPath;
+
+            if (! is_file($originalFile)) {
+                continue;
+            }
+
+            $originalSlots = $this->extractModuleSlotNames(File::get($originalFile));
+
+            if ($originalSlots === []) {
+                continue;
+            }
+
+            foreach ($this->discoverThemes() as $theme) {
+                $overrideFile = $this->themePath($theme, "modules/{$relativePath}");
+
+                if (! is_file($overrideFile)) {
+                    continue;
+                }
+
+                $this->assertSlotsPresent($originalSlots, File::get($overrideFile), $theme, "modules/{$relativePath}");
+            }
+        }
+    }
+
     public function test_theme_does_not_ship_views_outside_the_contract(): void
     {
         $allowedCore = array_keys($this->coreViewSamples());
@@ -328,5 +399,31 @@ class ThemeContractTest extends TestCase
     private function removeFixtureTheme(string $theme): void
     {
         File::deleteDirectory(resource_path("themes/{$theme}"));
+    }
+
+    /**
+     * @param  array<int, string>  $expectedSlots
+     */
+    private function assertSlotsPresent(array $expectedSlots, string $overrideSource, string $theme, string $relativePath): void
+    {
+        $overrideSlots = $this->extractModuleSlotNames($overrideSource);
+
+        foreach ($expectedSlots as $slotName) {
+            $this->assertContains(
+                $slotName,
+                $overrideSlots,
+                "Theme [{$theme}] override view views/{$relativePath} thiếu <x-module-slot name=\"{$slotName}\"> so với bản gốc."
+            );
+        }
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    private function extractModuleSlotNames(string $source): array
+    {
+        preg_match_all('/<x-module-slot\s+name="([^"]+)"/', $source, $matches);
+
+        return $matches[1];
     }
 }

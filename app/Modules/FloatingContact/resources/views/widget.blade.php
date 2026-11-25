@@ -1,4 +1,4 @@
-@if ($callUrl || $zaloUrl || $messengerUrl)
+@if ($callUrl || $zaloUrl || $messengerUrl || count(module_registry()->layoutPartials('floating_contact.extra_buttons')) > 0)
     <div
         class="fixed bottom-4 {{ $position === 'left' ? 'left-4' : 'right-4' }} z-40 flex flex-col gap-2"
     >
@@ -39,5 +39,7 @@
                 </svg>
             </a>
         @endif
+
+        <x-module-slot name="floating_contact.extra_buttons" />
     </div>
 @endif

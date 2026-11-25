@@ -40,6 +40,11 @@ class ModuleRegistry
     private array $themeViewContractProviders = [];
 
     /**
+     * @var array<string, array{label: string, provider: callable(): array<int, array{slug: string, label: string}>}>
+     */
+    private array $bookableSources = [];
+
+    /**
      * @param  array<string, mixed>|Closure  $data
      */
     public function registerNavItem(string $view, array|Closure $data = [], int $priority = 0): void
@@ -82,6 +87,31 @@ class ModuleRegistry
     public function registerThemeViewContract(callable $provider): void
     {
         $this->themeViewContractProviders[] = $provider;
+    }
+
+    /**
+     * Nguồn nội dung "đặt lịch được" — module nào có nội dung muốn cho đặt
+     * lịch (dịch vụ, sau này có thể là tour, lớp học...) tự đăng ký 1 nguồn
+     * dưới 1 khóa do chính nó chọn. Module tiêu thụ (ví dụ đặt lịch) chỉ lặp
+     * {@see bookableSources()} theo khóa/nhãn chung, không cần biết tên
+     * module nào đã đăng ký — module đó tắt thì khóa tương ứng biến mất khỏi
+     * kết quả, không lỗi.
+     *
+     * @param  callable(): array<int, array{slug: string, label: string}>  $provider
+     */
+    public function registerBookableSource(string $key, string $label, callable $provider): void
+    {
+        $this->bookableSources[$key] = ['label' => $label, 'provider' => $provider];
+    }
+
+    /**
+     * @return array<string, array{label: string, items: array<int, array{slug: string, label: string}>}>
+     */
+    public function bookableSources(): array
+    {
+        return collect($this->bookableSources)
+            ->map(fn (array $entry): array => ['label' => $entry['label'], 'items' => ($entry['provider'])()])
+            ->all();
     }
 
     /**

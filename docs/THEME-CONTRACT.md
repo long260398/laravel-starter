@@ -83,6 +83,28 @@ Dữ liệu mẫu được bọc trong Closure, chỉ chạy khi `ThemeContractT
 (giống cách `registerHomeSection`/`registerLayoutPartial` dùng Closure để lazy
 — factory tạo bản ghi mẫu không chạy ở mọi request thật, chỉ chạy trong test).
 
+Ví dụ tham khảo — view của module `booking` (`BookingServiceProvider::boot()`):
+
+| View | File override | Biến nhận được |
+|---|---|---|
+| `booking::create` | `modules/booking/create.blade.php` | `$bookableSources` (`array<string, array{label: string, items: array<int, array{slug: string, label: string}>}>`, từ `module_registry()->bookableSources()`), `$prefill` (`array{source: string, item: string, label: string}\|null`), `$timeSlots` (`array<string, string>`), `$minDate`/`$maxDate` (string `Y-m-d`), `$showEmailField` (bool), `$honeypotField`/`$tokenField`/`$formToken` (string). Ngoài ra dùng `$errors`. |
+| `booking::home-section` | `modules/booking/home-section.blade.php` | Không có — toàn bộ là nội dung/link tĩnh. |
+
+### Slot mở rộng (`<x-module-slot>`)
+
+Một số view (core hoặc module) tự mở "điểm cắm" cho module khác bằng
+component chung `<x-module-slot name="..." :context="[...]" />` (thay cho
+viết tay `@foreach (module_registry()->layoutPartials(...))`). `name` là tên
+slot do chính view đó đặt (ví dụ Services đặt `service.show.actions` trên
+trang chi tiết dịch vụ của nó); `context` là dữ liệu truyền tường minh cho
+module cắm vào — module cắm vào chỉ được đọc đúng các khoá trong `context`,
+không dựa vào biến khác của view gọi.
+
+Nếu 1 view gốc có `<x-module-slot name="X">`, **mọi theme override view đó
+cũng phải có đúng slot `X`** — thiếu là mất điểm cắm trên theme đó mà không
+báo lỗi rõ ràng. `ThemeContractTest` tự so khớp tên slot giữa bản gốc và mọi
+bản override (core lẫn module), không cần khai riêng.
+
 ## 3. Không thuộc theme (core, cố định)
 
 - `partials/seo.blade.php`, `partials/tracking.blade.php` — core, theme

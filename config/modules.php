@@ -1,5 +1,6 @@
 <?php
 
+use App\Modules\Booking\BookingServiceProvider;
 use App\Modules\Faq\FaqServiceProvider;
 use App\Modules\FloatingContact\FloatingContactServiceProvider;
 use App\Modules\Gallery\GalleryServiceProvider;
@@ -70,6 +71,15 @@ return [
         'namespace' => 'App\\Modules\\Faq',
         'route_prefixes' => ['faq'],
         'label' => 'Câu hỏi thường gặp',
+    ],
+
+    'booking' => [
+        'enabled' => (bool) env('MODULE_BOOKING', false),
+        'provider' => BookingServiceProvider::class,
+        'path' => app_path('Modules/Booking'),
+        'namespace' => 'App\\Modules\\Booking',
+        'route_prefixes' => ['booking'],
+        'label' => 'Đặt lịch',
     ],
 
 ];

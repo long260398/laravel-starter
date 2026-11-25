@@ -34,6 +34,12 @@ class ServicesServiceProvider extends ServiceProvider
             'services' => Service::query()->published()->featured()->orderBy('sort_order')->take(6)->get(),
         ]);
 
+        $registry->registerBookableSource('services', 'Dịch vụ', fn () => Service::query()->published()
+            ->orderBy('sort_order')
+            ->get(['slug', 'name'])
+            ->map(fn (Service $service): array => ['slug' => $service->slug, 'label' => $service->name])
+            ->all());
+
         $registry->registerSitemapUrls(fn () => Service::query()->published()->get()->map(
             fn (Service $service): array => [
                 'loc' => route('services.show', $service->slug),

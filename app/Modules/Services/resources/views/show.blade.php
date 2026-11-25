@@ -26,5 +26,7 @@
         <div class="prose mt-6 max-w-none text-ink">
             {!! $service->safe_content !!}
         </div>
+
+        <x-module-slot name="service.show.actions" :context="['source' => 'services', 'item' => $service->slug]" />
     </article>
 @endsection
