@@ -4,6 +4,7 @@ namespace App\Modules\Gallery\Models;
 
 use App\Contracts\HasMediaUsageLabel;
 use App\Models\Concerns\TracksMediaUsage;
+use App\Models\Media;
 use App\Modules\Gallery\Database\Factories\GalleryImageFactory;
 use App\Modules\Gallery\Filament\Resources\GalleryAlbums\GalleryAlbumResource;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -71,5 +72,17 @@ class GalleryImage extends Model implements HasMediaUsageLabel
         }
 
         return GalleryAlbumResource::getUrl('edit', ['record' => $this->gallery_album_id]);
+    }
+
+    /**
+     * `image` là cột NOT NULL và ảnh không có ý nghĩa gì nếu thiếu file — xóa
+     * hẳn dòng ảnh khỏi album thay vì đặt về null (sẽ tự gỡ usage qua event
+     * `deleted` của TracksMediaUsage, xem docblock ở đầu class).
+     */
+    public function releaseMediaOnForceDelete(string $field, Media $media): ?string
+    {
+        $this->delete();
+
+        return null;
     }
 }

@@ -50,6 +50,8 @@ class ServiceForm
                 RichEditor::make('content')
                     ->label('Nội dung')
                     ->required()
+                    ->fileAttachmentsDisk(config('media.disk'))
+                    ->fileAttachmentsDirectory('content')
                     ->columnSpanFull(),
                 TextInput::make('price')
                     ->label('Giá (VNĐ)')

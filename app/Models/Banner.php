@@ -23,7 +23,9 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Banner extends Model implements HasMediaUsageLabel
 {
     /** @use HasFactory<BannerFactory> */
-    use HasFactory, SoftDeletes, TracksMediaUsage;
+    use HasFactory, SoftDeletes, TracksMediaUsage {
+        TracksMediaUsage::releaseMediaOnForceDelete as private defaultReleaseMediaOnForceDelete;
+    }
 
     /**
      * @var array<string, string>
@@ -51,6 +53,24 @@ class Banner extends Model implements HasMediaUsageLabel
             'starts_at' => 'datetime',
             'ends_at' => 'datetime',
         ];
+    }
+
+    /**
+     * `image` là cột NOT NULL — không thể đặt về null như mặc định của
+     * TracksMediaUsage khi Admin xóa cưỡng ép ảnh đang dùng. Chuyển banner về
+     * Nháp để không hiện ngoài web (ảnh cũ vẫn còn trong cột nhưng không còn
+     * file thật, không ảnh hưởng vì đã ẩn khỏi frontend).
+     */
+    public function releaseMediaOnForceDelete(string $field, Media $media): ?string
+    {
+        if ($field !== 'image') {
+            return $this->defaultReleaseMediaOnForceDelete($field, $media);
+        }
+
+        $this->status = PublishStatus::Draft;
+        $this->save();
+
+        return "Banner “{$this->title}” đã chuyển về Nháp vì ảnh bắt buộc bị xóa.";
     }
 
     /**

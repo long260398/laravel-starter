@@ -48,7 +48,7 @@ class MediaForm
     /**
      * @return array<int, Text>
      */
-    private static function usageRows(?Media $record): array
+    public static function usageRows(?Media $record): array
     {
         $usages = $record?->usages ?? collect();
 

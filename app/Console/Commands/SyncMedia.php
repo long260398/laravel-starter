@@ -4,6 +4,8 @@ namespace App\Console\Commands;
 
 use App\Actions\RegisterMedia;
 use App\Actions\RegisterMediaUsage;
+use App\Actions\SyncContentMediaUsage;
+use App\Models\Concerns\TracksContentMediaUsage;
 use App\Models\Concerns\TracksMediaUsage;
 use App\Models\Media;
 use App\Models\MediaUsage;
@@ -45,6 +47,7 @@ class SyncMedia extends Command
         $usageCountBefore = MediaUsage::count();
 
         $this->syncFromModels();
+        $this->syncFromContent();
         $this->syncFromSettings();
         $skipped = $this->syncUnknownDiskFiles();
         $missing = $this->findMediaMissingOnDisk();
@@ -67,19 +70,8 @@ class SyncMedia extends Command
 
     private function syncFromModels(): void
     {
-        foreach ($this->modelClassesUsingTracksMediaUsage() as $class) {
-            /** @var Model $instance */
-            $instance = new $class;
-
-            if (! Schema::hasTable($instance->getTable())) {
-                continue;
-            }
-
-            $query = in_array(SoftDeletes::class, class_uses_recursive($class), true)
-                ? $class::withTrashed()
-                : $class::query();
-
-            foreach ($query->cursor() as $record) {
+        foreach ($this->modelClassesUsing(TracksMediaUsage::class) as $class) {
+            $this->eachRecordOf($class, function (Model $record): void {
                 foreach ($record->getFileColumns() as $column => $disk) {
                     $path = $record->getAttribute($column);
 
@@ -87,7 +79,27 @@ class SyncMedia extends Command
                         app(RegisterMediaUsage::class)->handle($disk, $path, $record, $column);
                     }
                 }
-            }
+            });
+        }
+    }
+
+    /**
+     * Quét field RichEditor (vd `content`, `answer`) — field này có thể chứa
+     * NHIỀU ảnh khác nhau trong HTML, khác với $fileColumns (1 field = 1 path).
+     */
+    private function syncFromContent(): void
+    {
+        foreach ($this->modelClassesUsing(TracksContentMediaUsage::class) as $class) {
+            $this->eachRecordOf($class, function (Model $record): void {
+                $column = $record->getContentMediaColumn();
+
+                app(SyncContentMediaUsage::class)->handle(
+                    $record,
+                    $column,
+                    (string) $record->getAttribute($column),
+                    config('media.disk'),
+                );
+            });
         }
     }
 
@@ -103,9 +115,31 @@ class SyncMedia extends Command
     }
 
     /**
+     * @param  class-string<Model>  $class
+     */
+    private function eachRecordOf(string $class, callable $callback): void
+    {
+        /** @var Model $instance */
+        $instance = new $class;
+
+        if (! Schema::hasTable($instance->getTable())) {
+            return;
+        }
+
+        $query = in_array(SoftDeletes::class, class_uses_recursive($class), true)
+            ? $class::withTrashed()
+            : $class::query();
+
+        foreach ($query->cursor() as $record) {
+            $callback($record);
+        }
+    }
+
+    /**
+     * @param  trait-string  $trait
      * @return array<int, class-string<Model>>
      */
-    private function modelClassesUsingTracksMediaUsage(): array
+    private function modelClassesUsing(string $trait): array
     {
         $classes = $this->discoverClassesIn(app_path('Models'), 'App\\Models');
 
@@ -119,7 +153,7 @@ class SyncMedia extends Command
 
         return array_values(array_filter(
             $classes,
-            fn (string $class): bool => in_array(TracksMediaUsage::class, class_uses_recursive($class), true),
+            fn (string $class): bool => in_array($trait, class_uses_recursive($class), true),
         ));
     }
 

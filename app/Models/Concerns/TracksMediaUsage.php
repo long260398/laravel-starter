@@ -4,6 +4,7 @@ namespace App\Models\Concerns;
 
 use App\Actions\RegisterMediaUsage;
 use App\Actions\ReleaseMediaUsage;
+use App\Models\Media;
 use Filament\Facades\Filament;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -135,5 +136,18 @@ trait TracksMediaUsage
         }
 
         return $resource::getUrl('edit', ['record' => $this]);
+    }
+
+    /**
+     * Mặc định: đặt field về null (chỉ đúng với cột nullable). Model có cột
+     * NOT NULL trong `$fileColumns` phải override — xem Banner (chuyển Nháp)
+     * và GalleryImage (xóa hẳn dòng ảnh).
+     */
+    public function releaseMediaOnForceDelete(string $field, Media $media): ?string
+    {
+        $this->{$field} = null;
+        $this->save();
+
+        return null;
     }
 }

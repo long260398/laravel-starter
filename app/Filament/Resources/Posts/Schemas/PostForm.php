@@ -62,6 +62,8 @@ class PostForm
                 RichEditor::make('content')
                     ->label('Nội dung')
                     ->required()
+                    ->fileAttachmentsDisk(config('media.disk'))
+                    ->fileAttachmentsDirectory('content')
                     ->columnSpanFull(),
                 Select::make('status')
                     ->label('Trạng thái')

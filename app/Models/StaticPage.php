@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Contracts\HasMediaUsageLabel;
 use App\Enums\PublishStatus;
+use App\Models\Concerns\TracksContentMediaUsage;
 use App\Models\Concerns\TracksMediaUsage;
 use Database\Factories\StaticPageFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -19,7 +20,9 @@ use Illuminate\Support\Str;
 class StaticPage extends Model implements HasMediaUsageLabel
 {
     /** @use HasFactory<StaticPageFactory> */
-    use HasFactory, SoftDeletes, TracksMediaUsage;
+    use HasFactory, SoftDeletes, TracksContentMediaUsage, TracksMediaUsage {
+        TracksMediaUsage::releaseMediaOnForceDelete as private defaultReleaseMediaOnForceDelete;
+    }
 
     /**
      * Slug tĩnh bị cấm vì trùng với các route/đường dẫn hệ thống đã biết.
@@ -40,11 +43,28 @@ class StaticPage extends Model implements HasMediaUsageLabel
         'featured_image' => 'public',
     ];
 
+    protected string $contentMediaColumn = 'content';
+
     protected static function booted(): void
     {
         static::creating(function (StaticPage $page): void {
             $page->sort_order ??= (static::query()->max('sort_order') ?? 0) + 1;
         });
+    }
+
+    /**
+     * `content` có thể chứa nhiều ảnh (TracksContentMediaUsage) khác với
+     * `featured_image` (TracksMediaUsage, 1 path cố định) — gỡ đúng loại field.
+     */
+    public function releaseMediaOnForceDelete(string $field, Media $media): ?string
+    {
+        if ($field === 'content') {
+            $this->removeMediaFromContentField('content', $media);
+
+            return null;
+        }
+
+        return $this->defaultReleaseMediaOnForceDelete($field, $media);
     }
 
     /**

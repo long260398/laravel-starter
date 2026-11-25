@@ -4,7 +4,9 @@ namespace App\Modules\Services\Models;
 
 use App\Contracts\HasMediaUsageLabel;
 use App\Enums\PublishStatus;
+use App\Models\Concerns\TracksContentMediaUsage;
 use App\Models\Concerns\TracksMediaUsage;
+use App\Models\Media;
 use App\Modules\Services\Database\Factories\ServiceFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Builder;
@@ -21,7 +23,9 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Service extends Model implements HasMediaUsageLabel
 {
     /** @use HasFactory<ServiceFactory> */
-    use HasFactory, SoftDeletes, TracksMediaUsage;
+    use HasFactory, SoftDeletes, TracksContentMediaUsage, TracksMediaUsage {
+        TracksMediaUsage::releaseMediaOnForceDelete as private defaultReleaseMediaOnForceDelete;
+    }
 
     /**
      * @var array<string, string>
@@ -30,11 +34,28 @@ class Service extends Model implements HasMediaUsageLabel
         'image' => 'public',
     ];
 
+    protected string $contentMediaColumn = 'content';
+
     protected static function booted(): void
     {
         static::creating(function (Service $service): void {
             $service->sort_order ??= (static::query()->max('sort_order') ?? 0) + 1;
         });
+    }
+
+    /**
+     * `content` có thể chứa nhiều ảnh (TracksContentMediaUsage) khác với
+     * `image` (TracksMediaUsage, 1 path cố định) — gỡ đúng loại field.
+     */
+    public function releaseMediaOnForceDelete(string $field, Media $media): ?string
+    {
+        if ($field === 'content') {
+            $this->removeMediaFromContentField('content', $media);
+
+            return null;
+        }
+
+        return $this->defaultReleaseMediaOnForceDelete($field, $media);
     }
 
     /**

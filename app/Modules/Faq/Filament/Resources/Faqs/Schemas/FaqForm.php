@@ -22,6 +22,8 @@ class FaqForm
                 RichEditor::make('answer')
                     ->label('Câu trả lời')
                     ->required()
+                    ->fileAttachmentsDisk(config('media.disk'))
+                    ->fileAttachmentsDirectory('content')
                     ->columnSpanFull(),
                 Select::make('status')
                     ->label('Trạng thái')

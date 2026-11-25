@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Contracts\HasMediaUsageLabel;
 use App\Enums\PublishStatus;
+use App\Models\Concerns\TracksContentMediaUsage;
 use App\Models\Concerns\TracksMediaUsage;
 use Database\Factories\PostFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -19,7 +20,9 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Post extends Model implements HasMediaUsageLabel
 {
     /** @use HasFactory<PostFactory> */
-    use HasFactory, SoftDeletes, TracksMediaUsage;
+    use HasFactory, SoftDeletes, TracksContentMediaUsage, TracksMediaUsage {
+        TracksMediaUsage::releaseMediaOnForceDelete as private defaultReleaseMediaOnForceDelete;
+    }
 
     /**
      * @var array<string, string>
@@ -28,6 +31,8 @@ class Post extends Model implements HasMediaUsageLabel
         'featured_image' => 'public',
     ];
 
+    protected string $contentMediaColumn = 'content';
+
     protected static function booted(): void
     {
         static::saving(function (Post $post): void {
@@ -35,6 +40,21 @@ class Post extends Model implements HasMediaUsageLabel
                 $post->published_at = now();
             }
         });
+    }
+
+    /**
+     * `content` có thể chứa nhiều ảnh (TracksContentMediaUsage) khác với
+     * `featured_image` (TracksMediaUsage, 1 path cố định) — gỡ đúng loại field.
+     */
+    public function releaseMediaOnForceDelete(string $field, Media $media): ?string
+    {
+        if ($field === 'content') {
+            $this->removeMediaFromContentField('content', $media);
+
+            return null;
+        }
+
+        return $this->defaultReleaseMediaOnForceDelete($field, $media);
     }
 
     /**

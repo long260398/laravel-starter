@@ -9,6 +9,7 @@ use App\Models\Setting;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
@@ -68,6 +69,31 @@ class SyncMediaCommandTest extends TestCase
 
         $this->assertSame($countAfterFirst, Media::query()->count());
         $this->assertSame($usageCountAfterFirst, MediaUsage::query()->count());
+    }
+
+    public function test_registers_usage_for_images_embedded_in_content_not_yet_tracked(): void
+    {
+        Storage::fake(config('media.disk'));
+
+        $path = UploadedFile::fake()->image('a.jpg')->store('content', config('media.disk'));
+        $url = Storage::disk(config('media.disk'))->url($path);
+
+        // Giả lập bài viết cũ: content đã có ảnh từ trước khi tính năng theo
+        // dõi usage trong RichEditor tồn tại — ghi thẳng xuống DB, bỏ qua mọi
+        // Eloquent event, để chắc chắn chưa có usage nào được đăng ký.
+        $post = Post::factory()->create(['content' => 'Chưa có ảnh nào.']);
+        DB::table('posts')->where('id', $post->id)->update(['content' => "<p><img src=\"{$url}\"></p>"]);
+
+        $this->assertDatabaseMissing('media_usages', ['usable_id' => $post->id, 'field' => 'content']);
+
+        Artisan::call('media:sync');
+
+        $this->assertDatabaseHas('media', ['path' => $path]);
+        $this->assertDatabaseHas('media_usages', [
+            'usable_type' => Post::class,
+            'usable_id' => $post->id,
+            'field' => 'content',
+        ]);
     }
 
     public function test_reports_media_missing_on_disk(): void

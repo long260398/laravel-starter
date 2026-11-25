@@ -101,4 +101,11 @@ class Setting extends Model implements HasMediaUsageLabel
     {
         return SettingsPage::getUrl();
     }
+
+    public function releaseMediaOnForceDelete(string $field, Media $media): ?string
+    {
+        static::set($field, null);
+
+        return null;
+    }
 }
